@@ -1,6 +1,5 @@
 package com.dongxiguo.protobuf.compiler;
 
-import com.dongxiguo.protobuf.Error;
 import com.dongxiguo.protobuf.binaryFormat.IBinaryInput;
 import com.dongxiguo.protobuf.binaryFormat.WireType;
 import com.dongxiguo.protobuf.compiler.NameConverter;
@@ -22,6 +21,7 @@ private typedef IntMap<Value> = IntHash<Value>;
 private typedef StringMap<Value> = Hash<Value>;
 #end
 private typedef ProtobufType = com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
+private typedef ProtobufError = com.dongxiguo.protobuf.Error;
 
 /**
  * @author 杨博
@@ -87,7 +87,7 @@ class BinaryFormat
     {
       if (field.extendee != null)
       {
-        throw Error.BadDescriptor;
+        throw ProtobufError.BadDescriptor;
       }
       var fieldName = builderNameConverter.toHaxeFieldName(field.name);
       var readFunctionName = switch (Type.enumConstructor(field.type).split("_"))
@@ -98,7 +98,7 @@ class BinaryFormat
         }
         default:
         {
-          throw Error.MalformedEnumConstructor;
+          throw ProtobufError.MalformedEnumConstructor;
         }
       }
       var readExpr = switch (field.type)
