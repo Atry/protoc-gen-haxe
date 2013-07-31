@@ -13,11 +13,11 @@ class MethodDescriptorProto_Merger {
 			});
 		};
 		fieldMap;
-	}
-	@:extern public static inline function mergeFrom(builder,input):Void {
+	};
+	public static inline function mergeFrom(builder,input):Void {
 		com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeFrom(FIELD_MAP,builder,input);
 	}
-	@:extern public static inline function mergeDelimitedFrom(builder,input):Void {
+	public static inline function mergeDelimitedFrom(builder,input):Void {
 		com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeDelimitedFrom(FIELD_MAP,builder,input);
 	}
 }

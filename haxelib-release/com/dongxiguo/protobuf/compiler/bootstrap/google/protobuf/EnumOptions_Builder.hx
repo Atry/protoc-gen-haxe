@@ -1,7 +1,9 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class EnumOptions_Builder {
 	static var __default_allowAlias(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=true;
-	function set_allowAlias(value) return allowAlias=value;
+	function set_allowAlias(value) {
+		return allowAlias=value;
+	}
 	function get_allowAlias() if(allowAlias!=null) {
 		return allowAlias;
 	} else {

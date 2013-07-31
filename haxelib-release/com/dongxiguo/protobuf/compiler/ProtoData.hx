@@ -247,7 +247,7 @@ private typedef StringMap<Value> = Hash<Value>;
         var constructorName = enumNameConverter.toHaxeEnumConstructorName(value.name);
         {
           guard: null,
-          values: [ macro { $enumExpr.$constructorName; }, ],
+          values: [ macro $enumExpr.$constructorName, ],
           expr: Context.makeExpr(value.number, Context.currentPos()),
         }
       }
@@ -260,7 +260,7 @@ private typedef StringMap<Value> = Hash<Value>;
       pos: Context.currentPos(),
       meta: [],
       params: [],
-      isExtern: true,
+      isExtern: false,
       kind: TDClass(),
       fields:
       [
@@ -297,10 +297,7 @@ private typedef StringMap<Value> = Hash<Value>;
                 expr: EReturn(
                   {
                     pos: Context.currentPos(),
-                    expr: ESwitch(
-                      macro enumValue,
-                      getNumberCases,
-                      macro { throw "Unknown enum value: " + number; } ),
+                    expr: ESwitch(macro enumValue, getNumberCases, null),
                   }),
               },
               params: [],
@@ -645,7 +642,7 @@ private typedef StringMap<Value> = Hash<Value>;
                   ret: null,
                   params: [],
                   args: [ { name: "value", opt: false, type: null }, ],
-                  expr: macro return $haxeFieldExpr = value,
+                  expr: macro { return $haxeFieldExpr = value; },
                 }),
               });
               fields.push(

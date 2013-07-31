@@ -16,11 +16,11 @@ class UninterpretedOption_Merger {
 			fieldMap.set(66,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.aggregateValue=com.dongxiguo.protobuf.binaryFormat.ReadUtils.readString(input));
 		};
 		fieldMap;
-	}
-	@:extern public static inline function mergeFrom(builder,input):Void {
+	};
+	public static inline function mergeFrom(builder,input):Void {
 		com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeFrom(FIELD_MAP,builder,input);
 	}
-	@:extern public static inline function mergeDelimitedFrom(builder,input):Void {
+	public static inline function mergeDelimitedFrom(builder,input):Void {
 		com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeDelimitedFrom(FIELD_MAP,builder,input);
 	}
 }
