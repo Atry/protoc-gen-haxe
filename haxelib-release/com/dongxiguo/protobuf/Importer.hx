@@ -106,6 +106,19 @@ class Importer
     }
   }
 
+  public static function defineAllBinaryWriters(self:ProtoData):Void
+  {
+    for (fullName in self.messages.keys())
+    {
+      Context.defineType(
+        self.getWriterDefinition(
+          fullName,
+          NameConverter.DEFAULT_WRITER_NAME_CONVERTER,
+          NameConverter.DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
+          NameConverter.DEFAULT_ENUM_CLASS_NAME_CONVERTER));
+    }
+  }
+
   @:noUsing
   public static function importDescroptorFileSet(fileName:String):Void
   {
@@ -113,6 +126,7 @@ class Importer
     defineAllEnums(protoData);
     defineAllReadonlyMessages(protoData);
     defineAllBuilders(protoData);
+    defineAllBinaryWriters(protoData);
     defineAllBinaryMergers(protoData);
   }
 }

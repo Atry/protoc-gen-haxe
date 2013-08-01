@@ -39,7 +39,7 @@ package com.dongxiguo.protobuf.compiler;
     }
     return buffer.toString();
   }
-  
+
   public static function asLowerCamelCasePackage(fullyQualifiedName:String):Array<String>
   {
     var nameParts = fullyQualifiedName.split(".");
@@ -51,7 +51,7 @@ package com.dongxiguo.protobuf.compiler;
       }
     ];
   }
-  
+
   public static function getLowerCamelCasePackage(fullyQualifiedName:String):Array<String>
   {
     var nameParts = fullyQualifiedName.split(".");
@@ -69,24 +69,24 @@ package com.dongxiguo.protobuf.compiler;
   {
     return fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf(".") + 1);
   }
-  
+
   public static function identity(name:String):String
   {
     return name;
   }
-  
+
   public static var KEYWORD_EREG(default, never) = ~/^(break|callback|case|cast|catch|class|continue|default|do|dynamic|else|enum|extends|extern|false|for|function|here|if|implements|import|in|inline|interface|never|new|null|override|package|private|public|return|static|super|switch|this|throw|trace|true|try|typedef|untyped|using|var|while)$/;
-  
+
   public static function replaceKeyword(keyword:String):String
   {
     return KEYWORD_EREG.replace(keyword, "$1_");
   }
-  
+
   public static function replaceKeywords(keywords:Array<String>):Array<String>
   {
     return [ for (keyword in keywords) KEYWORD_EREG.replace(keyword, "$1_") ];
   }
-  
+
   public static var DEFAULT_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
@@ -141,7 +141,7 @@ package com.dongxiguo.protobuf.compiler;
     },
     toHaxeClassName: lowerCaseUnderlineToUpperCamelCase,
   };
-  
+
   public static var DEFAULT_MERGER_NAME_CONVERTER(default, never):UtilityNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
@@ -153,7 +153,19 @@ package com.dongxiguo.protobuf.compiler;
       return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
     },
   };
-  
+
+  public static var DEFAULT_WRITER_NAME_CONVERTER(default, never):UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return getClassName(protoFullyQualifiedName) + "_Writer";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  };
+
   public static var DEFAULT_ENUM_CLASS_NAME_CONVERTER(default, never):UtilityNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String

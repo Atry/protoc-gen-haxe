@@ -90,17 +90,6 @@ class BinaryFormat
         throw ProtobufError.BadDescriptor;
       }
       var fieldName = builderNameConverter.toHaxeFieldName(field.name);
-      var readFunctionName = switch (Type.enumConstructor(field.type).split("_"))
-      {
-        case [ "TYPE", upperCaseTypeName ]:
-        {
-          "read" + upperCaseTypeName.charAt(0) + upperCaseTypeName.substring(1).toLowerCase();
-        }
-        default:
-        {
-          throw ProtobufError.MalformedEnumConstructor;
-        }
-      }
       var readExpr = switch (field.type)
       {
         case ProtobufType.TYPE_MESSAGE:
@@ -141,6 +130,17 @@ class BinaryFormat
         }
         default:
         {
+          var readFunctionName = switch (Type.enumConstructor(field.type).split("_"))
+          {
+            case [ "TYPE", upperCaseTypeName ]:
+            {
+              "read" + upperCaseTypeName.charAt(0) + upperCaseTypeName.substring(1).toLowerCase();
+            }
+            default:
+            {
+              throw ProtobufError.MalformedEnumConstructor;
+            }
+          }
           macro com.dongxiguo.protobuf.binaryFormat.ReadUtils.$readFunctionName(input);
         }
       };
@@ -356,6 +356,223 @@ class BinaryFormat
       case { expr: EFunction(_, f), } : f;
       default: throw "Assertion failed!";
     };
+
+  static var WRITE_DELIMITED_TO_FUNCTION(null, never) =
+    switch (macro function(message, output:haxe.io.Output):Void
+    {
+      var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
+      var i = buffer.beginBlock();
+      writeFields(message, buffer);
+      buffer.endBlock(i);
+      buffer.toNormal(buffer);
+    })
+    {
+      case { expr: EFunction(_, f), } : f;
+      default: throw "Assertion failed!";
+    };
+
+  static var WRITING_BUFFER_COMPLEX_TYPE(default, never) = TPath(
+    {
+      pack: [ "com", "dongxiguo", "protobuf", "binaryFormat" ],
+      name: "WritingBuffer",
+      params: [],
+    });
+
+  public static function getWriterDefinition(
+    self:ProtoData,
+    fullyName:String,
+    writerNameConverter:UtilityNameConverter,
+    messageNameConverter:MessageNameConverter,
+    enumClassNameConverter:UtilityNameConverter):TypeDefinition
+  {
+    var messageType = TPath(
+    {
+      params: [],
+      name: messageNameConverter.getHaxeClassName(fullyName),
+      pack: messageNameConverter.getHaxePackage(fullyName),
+    });
+
+    return
+    {
+      pack: writerNameConverter.getHaxePackage(fullyName),
+      name: writerNameConverter.getHaxeClassName(fullyName),
+      pos: Context.currentPos(),
+      meta: [],
+      params: [],
+      isExtern: false,
+      kind: TDClass(),
+      fields:
+      [
+        {
+          name: "writeFields",
+          access: [ AStatic, APublic ],
+          pos: Context.currentPos(),
+          meta: [],
+          kind: FFun(
+            {
+              params: [],
+              args:
+              [
+                {
+                  name: "message",
+                  opt: false,
+                  type: messageType,
+                  value: null,
+                },
+                {
+                  name: "buffer",
+                  opt: false,
+                  type: WRITING_BUFFER_COMPLEX_TYPE,
+                  value: null,
+                },
+              ],
+              ret: null,
+              expr:
+              {
+                pos: Context.currentPos(),
+                expr: EBlock(
+                  [
+                    for (field in self.messages.get(fullyName).field)
+                    {
+                      if (field.extendee != null)
+                      {
+                        throw ProtobufError.BadDescriptor;
+                      }
+                      var fieldName = messageNameConverter.toHaxeFieldName(field.name);
+                      var writeField = switch (field.type)
+                      {
+                        case ProtobufType.TYPE_GROUP:
+                        {
+                          Context.warning("TYPE_GROUP is unsupported!", Context.currentPos());
+                          {
+                            pos: Context.currentPos(),
+                            expr: EBlock([]),
+                          }
+                        }
+                        case ProtobufType.TYPE_ENUM:
+                        {
+                          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullyName, field.typeName);
+                          var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
+                          var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
+                          macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $enumPackageExpr.$enumClassName.getNumber(fieldValue));
+                        }
+                        case ProtobufType.TYPE_MESSAGE:
+                        {
+                          var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullyName, field.typeName);
+                          var nestedWriterPackage =
+                            writerNameConverter.getHaxePackage(resolvedFieldTypeName);
+                          var nestedWriterPackageExpr =
+                            ExprTools.toFieldExpr(nestedWriterPackage);
+                          var nestedWriterName =
+                            writerNameConverter.getHaxeClassName(resolvedFieldTypeName);
+                          macro
+                          {
+                            var i = buffer.beginBlock();
+                            $nestedWriterPackageExpr.$nestedWriterName.writeFields(fieldValue, buffer);
+                            buffer.endBlock(i);
+                          }
+                        }
+                        default:
+                        {
+                          var writeFunctionName = switch (Type.enumConstructor(field.type).split("_"))
+                          {
+                            case [ "TYPE", upperCaseTypeName ]:
+                            {
+                              "write" + upperCaseTypeName.charAt(0) + upperCaseTypeName.substring(1).toLowerCase();
+                            }
+                            default:
+                            {
+                              throw ProtobufError.MalformedEnumConstructor;
+                            }
+                          }
+                          macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.$writeFunctionName(buffer, fieldValue);
+                        }
+                      }
+                      switch (field.label)
+                      {
+                        case LABEL_OPTIONAL:
+                        {
+                          var tagExpr = Context.makeExpr(
+                            WireType.byType(field.type) | (field.number << 3),
+                            Context.currentPos());
+                          macro
+                          {
+                            var fieldValue = message.$fieldName;
+                            if (fieldValue != null)
+                            {
+                              com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $tagExpr);
+                              $writeField;
+                            }
+                          }
+                        }
+                        case LABEL_REQUIRED:
+                        {
+                          var tagExpr = Context.makeExpr(
+                            WireType.byType(field.type) | (field.number << 3),
+                            Context.currentPos());
+                          macro
+                          {
+                            var fieldValue = message.$fieldName;
+                            com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $tagExpr);
+                            $writeField;
+                          }
+                        }
+                        case LABEL_REPEATED:
+                        {
+                          if (field.options != null && field.options.packed)
+                          {
+                            var tagExpr = Context.makeExpr(
+                              WireType.LENGTH_DELIMITED | (field.number << 3),
+                              Context.currentPos());
+                            macro
+                            {
+                              com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $tagExpr);
+                              var i = buffer.beginBlock();
+                              for (fieldValue in message.$fieldName)
+                              {
+                                $writeField;
+                              }
+                              buffer.endBlock(i);
+                            }
+                          }
+                          else
+                          {
+                            var tagExpr = Context.makeExpr(
+                              WireType.byType(field.type) | (field.number << 3),
+                              Context.currentPos());
+                            macro
+                            {
+                              for (fieldValue in message.$fieldName)
+                              {
+                                com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $tagExpr);
+                                $writeField;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]),
+              }
+            })
+        },
+        {
+          name: "writeTo",
+          access: [ APublic, AStatic, AInline ],
+          pos: Context.currentPos(),
+          meta: [],
+          kind: FFun(WRITE_TO_FUNCTION)
+        },
+        {
+          name: "writeDelimitedTo",
+          access: [ APublic, AStatic, AInline ],
+          pos: Context.currentPos(),
+          meta: [],
+          kind: FFun(WRITE_DELIMITED_TO_FUNCTION)
+        }
+      ]
+    };
+  }
 
 }
 
