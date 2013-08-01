@@ -1,10 +1,11 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class EnumOptions_Builder {
+	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	static var __default_allowAlias(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=true;
-	function set_allowAlias(value) {
+	inline function set_allowAlias(value) {
 		return allowAlias=value;
 	}
-	function get_allowAlias() if(allowAlias!=null) {
+	inline function get_allowAlias() if(allowAlias!=null) {
 		return allowAlias;
 	} else {
 		return __default_allowAlias;
@@ -13,5 +14,8 @@ class EnumOptions_Builder {
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
 	public function new() {
 		this.uninterpretedOption=[];
+	}
+	public inline function sortUnknownFields() {
+		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumOptions_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

@@ -1,7 +1,7 @@
 package com.dongxiguo.protobuf.compiler;
 
 import com.dongxiguo.protobuf.binaryFormat.IBinaryInput;
-import com.dongxiguo.protobuf.binaryFormat.WireType;
+import com.dongxiguo.protobuf.WireType;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.ProtoData;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
@@ -59,7 +59,7 @@ class BinaryFormat
 
   public static function getMergerDefinition(
     self:ProtoData,
-    fullyName:String,
+    fullName:String,
     mergerNameConverter:UtilityNameConverter,
     builderNameConverter:MessageNameConverter,
     enumClassNameConverter:UtilityNameConverter):TypeDefinition
@@ -67,8 +67,8 @@ class BinaryFormat
     var builderType = TPath(
     {
       params: [],
-      name: builderNameConverter.getHaxeClassName(fullyName),
-      pack: builderNameConverter.getHaxePackage(fullyName),
+      name: builderNameConverter.getHaxeClassName(fullName),
+      pack: builderNameConverter.getHaxePackage(fullName),
     });
     var fieldMapTypePath =
     {
@@ -83,7 +83,7 @@ class BinaryFormat
       expr: ENew(fieldMapTypePath, []),
     }
     var insertions = [];
-    for (field in self.messages.get(fullyName).field)
+    for (field in self.messages.get(fullName).field)
     {
       if (field.extendee != null)
       {
@@ -94,7 +94,7 @@ class BinaryFormat
       {
         case ProtobufType.TYPE_MESSAGE:
         {
-          var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullyName, field.typeName);
+          var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullName, field.typeName);
           var fieldBuilderTypePath =
           {
             params: [],
@@ -122,7 +122,7 @@ class BinaryFormat
         }
         case ProtobufType.TYPE_ENUM:
         {
-          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullyName, field.typeName);
+          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullName, field.typeName);
           var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
           var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
           macro $enumPackageExpr.$enumClassName.valueOf(
@@ -299,8 +299,8 @@ class BinaryFormat
 
     return
     {
-      pack: mergerNameConverter.getHaxePackage(fullyName),
-      name: mergerNameConverter.getHaxeClassName(fullyName),
+      pack: mergerNameConverter.getHaxePackage(fullName),
+      name: mergerNameConverter.getHaxeClassName(fullName),
       pos: Context.currentPos(),
       meta: [],
       params: [],
@@ -380,7 +380,7 @@ class BinaryFormat
 
   public static function getWriterDefinition(
     self:ProtoData,
-    fullyName:String,
+    fullName:String,
     writerNameConverter:UtilityNameConverter,
     messageNameConverter:MessageNameConverter,
     enumClassNameConverter:UtilityNameConverter):TypeDefinition
@@ -388,14 +388,14 @@ class BinaryFormat
     var messageType = TPath(
     {
       params: [],
-      name: messageNameConverter.getHaxeClassName(fullyName),
-      pack: messageNameConverter.getHaxePackage(fullyName),
+      name: messageNameConverter.getHaxeClassName(fullName),
+      pack: messageNameConverter.getHaxePackage(fullName),
     });
 
     return
     {
-      pack: writerNameConverter.getHaxePackage(fullyName),
-      name: writerNameConverter.getHaxeClassName(fullyName),
+      pack: writerNameConverter.getHaxePackage(fullName),
+      name: writerNameConverter.getHaxeClassName(fullName),
       pos: Context.currentPos(),
       meta: [],
       params: [],
@@ -432,7 +432,8 @@ class BinaryFormat
                 pos: Context.currentPos(),
                 expr: EBlock(
                   [
-                    for (field in self.messages.get(fullyName).field)
+                    // TODO: UnknownFields
+                    for (field in self.messages.get(fullName).field)
                     {
                       if (field.extendee != null)
                       {
@@ -451,14 +452,14 @@ class BinaryFormat
                         }
                         case ProtobufType.TYPE_ENUM:
                         {
-                          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullyName, field.typeName);
+                          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullName, field.typeName);
                           var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
                           var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
                           macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $enumPackageExpr.$enumClassName.getNumber(fieldValue));
                         }
                         case ProtobufType.TYPE_MESSAGE:
                         {
-                          var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullyName, field.typeName);
+                          var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullName, field.typeName);
                           var nestedWriterPackage =
                             writerNameConverter.getHaxePackage(resolvedFieldTypeName);
                           var nestedWriterPackageExpr =

@@ -1,5 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class DescriptorProto_Builder {
+	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	@:optional public var name(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	public var field(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Builder>;
 	public var extension(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Builder>;
@@ -13,5 +14,8 @@ class DescriptorProto_Builder {
 		this.nestedType=[];
 		this.enumType=[];
 		this.extensionRange=[];
+	}
+	public inline function sortUnknownFields() {
+		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

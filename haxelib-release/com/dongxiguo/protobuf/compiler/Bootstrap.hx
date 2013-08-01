@@ -18,6 +18,18 @@ class Bootstrap
 {
   static var BOOTSTRAP_PACKAGE_PREFIX(default, never) = [ "com", "dongxiguo", "protobuf", "compiler", "bootstrap" ];
 
+  static var BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER(default, never):NameConverter.UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_ExtensionSet";
+    },
+    getHaxePackage: function(protoPackage:String):Array<String>
+    {
+      return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
+    },
+  };
+
   static var BOOTSTRAP_MERGER_NAME_CONVERTER(default, never):NameConverter.UtilityNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
@@ -29,7 +41,7 @@ class Bootstrap
       return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
     },
   };
-  
+
   static var BOOTSTRAP_BUILDER_NAME_CONVERTER(default, never):NameConverter.MessageNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
@@ -42,7 +54,7 @@ class Bootstrap
     },
     toHaxeFieldName: NameConverter.DEFAULT_BUILDER_NAME_CONVERTER.toHaxeFieldName,
   };
-  
+
   static var BOOTSTRAP_READONLY_MESSAGE_NAME_CONVERTER(default, never):NameConverter.MessageNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
@@ -77,7 +89,7 @@ class Bootstrap
       return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
     },
   };
-    
+
   static function createParentDirectories(path:String):Void
   {
     var eReg = ~/(.*)[\\\/]([^\\\/]*)/;
@@ -91,7 +103,7 @@ class Bootstrap
       FileSystem.createDirectory(baseDirectory);
     }
   }
-  
+
   static function createPackageDirectories(
     outputDirectory:String,
     pack:Array<String>):String
@@ -107,7 +119,7 @@ class Bootstrap
     }
     return d;
   }
-  
+
   static function writeHxFile(
     outputDirectory:String,
     typeDefinition:TypeDefinition):Void
@@ -127,7 +139,7 @@ class Bootstrap
     }
     output.close();
   }
-  
+
   static function readProtoData(fileName:String):ProtoData
   {
     var builder:FileDescriptorSet = { file: [] };
@@ -170,9 +182,15 @@ class Bootstrap
     {
       writeHxFile(
         outputDirectory,
+        protoData.getExtensionSetDefinition(
+          fullName,
+          BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER));
+      writeHxFile(
+        outputDirectory,
         protoData.getBuilderDefinition(
           fullName,
           BOOTSTRAP_BUILDER_NAME_CONVERTER,
+          BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER,
           BOOTSTRAP_ENUM_NAME_CONVERTER));
       writeHxFile(
         outputDirectory,

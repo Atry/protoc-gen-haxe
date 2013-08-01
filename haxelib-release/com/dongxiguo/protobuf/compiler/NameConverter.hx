@@ -129,6 +129,18 @@ package com.dongxiguo.protobuf.compiler;
     },
   };
 
+  public static var DEFAULT_EXTENSION_SET_NAME_CONVERTER(default, never):UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return getClassName(protoFullyQualifiedName) + "_ExtensionSet";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  }
+
   public static var DEFAULT_EXTENSION_NAME_CONVERTER(default, never):ExtensionNameConverter =
   {
     nestedMessageToHaxePackage: function(fullyQualifiedName:String):Array<String>

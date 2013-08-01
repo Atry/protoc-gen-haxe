@@ -1,5 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 typedef FileOptions = {
+	@:optional public var unknownFields(default,null):Iterable<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	@:optional public var javaPackage(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var javaOuterClassname(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:isVar public var javaMultipleFiles(get_javaMultipleFiles,set_javaMultipleFiles):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;

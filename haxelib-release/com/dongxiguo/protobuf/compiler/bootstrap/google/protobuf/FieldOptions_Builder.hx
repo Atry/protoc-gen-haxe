@@ -1,10 +1,11 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FieldOptions_Builder {
+	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	static var __default_ctype(null,never):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType>=com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType.STRING;
-	function set_ctype(value) {
+	inline function set_ctype(value) {
 		return ctype=value;
 	}
-	function get_ctype() if(ctype!=null) {
+	inline function get_ctype() if(ctype!=null) {
 		return ctype;
 	} else {
 		return __default_ctype;
@@ -12,20 +13,20 @@ class FieldOptions_Builder {
 	@:isVar public var ctype(get_ctype,set_ctype):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType>;
 	@:optional public var packed(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	static var __default_lazy(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
-	function set_lazy(value) {
+	inline function set_lazy(value) {
 		return lazy=value;
 	}
-	function get_lazy() if(lazy!=null) {
+	inline function get_lazy() if(lazy!=null) {
 		return lazy;
 	} else {
 		return __default_lazy;
 	}
 	@:isVar public var lazy(get_lazy,set_lazy):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	static var __default_deprecated(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
-	function set_deprecated(value) {
+	inline function set_deprecated(value) {
 		return deprecated=value;
 	}
-	function get_deprecated() if(deprecated!=null) {
+	inline function get_deprecated() if(deprecated!=null) {
 		return deprecated;
 	} else {
 		return __default_deprecated;
@@ -33,10 +34,10 @@ class FieldOptions_Builder {
 	@:isVar public var deprecated(get_deprecated,set_deprecated):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	@:optional public var experimentalMapKey(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	static var __default_weak(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
-	function set_weak(value) {
+	inline function set_weak(value) {
 		return weak=value;
 	}
-	function get_weak() if(weak!=null) {
+	inline function get_weak() if(weak!=null) {
 		return weak;
 	} else {
 		return __default_weak;
@@ -45,5 +46,8 @@ class FieldOptions_Builder {
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
 	public function new() {
 		this.uninterpretedOption=[];
+	}
+	public inline function sortUnknownFields() {
+		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

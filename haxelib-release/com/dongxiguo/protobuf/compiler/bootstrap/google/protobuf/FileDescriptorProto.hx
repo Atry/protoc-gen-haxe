@@ -1,5 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 typedef FileDescriptorProto = {
+	@:optional public var unknownFields(default,null):Iterable<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	@:optional public var name(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var package_(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	public var dependency(default,null):Iterable<com.dongxiguo.protobuf.Types.TYPE_STRING>;

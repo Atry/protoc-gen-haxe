@@ -5,6 +5,8 @@ import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Label;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
+import haxe.io.Bytes;
+import haxe.io.BytesData;
 using Type;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
@@ -61,7 +63,9 @@ private typedef StringMap<Value> = Hash<Value>;
   public static function readBytes(input:IBinaryInput):Types.TYPE_BYTES
   {
     var length = ReadUtils.readUint32(input);
-    return input.readBytes(length);
+    var bytes = Bytes.alloc(length);
+    input.readBytes(bytes.getData(), 0, length);
+    return bytes;
   }
 
   public static function readBool(input:IBinaryInput):Types.TYPE_BOOL

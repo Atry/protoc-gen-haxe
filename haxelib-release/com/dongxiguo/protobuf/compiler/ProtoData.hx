@@ -13,6 +13,7 @@ import haxe.io.BytesOutput;
 import haxe.macro.Expr;
 import haxe.Int64;
 import haxe.macro.Context;
+import haxe.macro.ExprTools;
 using StringTools;
 #if haxe3
 import haxe.ds.StringMap;
@@ -513,6 +514,21 @@ private typedef StringMap<Value> = Hash<Value>;
     return getEnumDefinition(fullName, enumNameConverter, FakeEnumBehavior.NEVER);
   }
 
+  static var UNKNOWN_FIELD_COMPLEX_TYPE(default, never) = TPath(
+    {
+      pack: [ "com", "dongxiguo", "protobuf" ],
+      name: "UnknownField",
+      params:
+      [
+        TPType(TPath(
+          {
+            pack: [],
+            name: "Dynamic",
+            params: [],
+          })),
+      ],
+    });
+
   function getMessageDefinition(
     fullName:String,
     messageNameConverter:NameConverter.MessageNameConverter,
@@ -557,8 +573,29 @@ private typedef StringMap<Value> = Hash<Value>;
         }
       }
     }
-
-    var fields:Array<Field> = [];
+    var fields:Array<Field> = [
+      {
+        name: "unknownFields",
+        access: [ APublic ],
+        pos: Context.currentPos(),
+        meta:
+        [
+          {
+            name: ":optional",
+            params: [],
+            pos: Context.currentPos(),
+          },
+        ],
+        kind: FProp(
+          "default",
+          readonly ? "null" : "default",
+           TPath(
+              {
+                pack: [],
+                name: readonly ? "Iterable" : "Array",
+                params: [TPType(UNKNOWN_FIELD_COMPLEX_TYPE)],
+              })),
+      }];
     var messageProto = messages.get(fullName);
     var constructorBlock = [];
     for (field in messageProto.field)
@@ -636,6 +673,7 @@ private typedef StringMap<Value> = Hash<Value>;
               fields.push(
               {
                 name: setterName,
+                access: [ AInline ],
                 pos: Context.currentPos(),
                 kind: FFun(
                 {
@@ -648,6 +686,7 @@ private typedef StringMap<Value> = Hash<Value>;
               fields.push(
               {
                 name: getterName,
+                access: [ AInline ],
                 pos: Context.currentPos(),
                 kind: FFun(
                 {
@@ -712,7 +751,7 @@ private typedef StringMap<Value> = Hash<Value>;
         {
           name: "new",
           pos: Context.currentPos(),
-          access: [APublic],
+          access: [ APublic ],
           kind: FFun(
           {
             ret: null,
@@ -744,15 +783,150 @@ private typedef StringMap<Value> = Hash<Value>;
     readonlyNameConverter:NameConverter.MessageNameConverter,
     enumNameConverter:NameConverter.EnumNameConverter):TypeDefinition
   {
-    return getMessageDefinition(fullName, readonlyNameConverter, enumNameConverter, true);
+    return getMessageDefinition(
+      fullName,
+      readonlyNameConverter,
+      enumNameConverter,
+      true);
+  }
+
+  static var ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE = ComplexType.TPath(
+  {
+    pack: [],
+    name: "Array",
+    params: [ TPType(UNKNOWN_FIELD_COMPLEX_TYPE) ],
+  });
+
+  static var EXTENSION_SET_KIND(default, never) = TypeDefKind.TDAbstract(
+    ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
+    null,
+    [ ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE ]);
+
+  static var EXTENSION_SET_NEW_FIELD(default, never):Field =
+  {
+    name: "new",
+    pos: Context.currentPos(),
+    access: [ AInline ],
+    kind: FFun(
+      {
+        args:
+        [
+          {
+            name: "sortedArray",
+            opt: false,
+            type: ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
+          }
+        ],
+        ret: null,
+        params: [],
+        expr: macro { this = sortedArray; },
+      }),
+  };
+
+  public function getExtensionSetDefinition(
+    fullName:String,
+    extensionSetNameConverter:NameConverter.UtilityNameConverter):TypeDefinition
+  {
+    var thisPack = extensionSetNameConverter.getHaxePackage(fullName);
+    var thisPackExpr = ExprTools.toFieldExpr(thisPack);
+    var thisName = extensionSetNameConverter.getHaxeClassName(fullName);
+    return
+    {
+      pack: thisPack,
+      name: thisName,
+      pos: Context.currentPos(),
+      meta: [],
+      params: [],
+      isExtern: false,
+      kind: EXTENSION_SET_KIND,
+      fields:
+      [
+        EXTENSION_SET_NEW_FIELD,
+        {
+          name: "sortUnknownFields",
+          pos: Context.currentPos(),
+          access: [ APublic, AStatic, AInline ],
+          meta: [],
+          kind: FFun(
+            {
+              args:
+              [
+                {
+                  name: "array",
+                  opt: false,
+                  type: ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
+                }
+              ],
+              ret: TPath(
+                {
+                  pack: thisPack,
+                  name: thisName,
+                  params: [],
+                }),
+              params: [],
+              expr:
+              {
+                pos: Context.currentPos(),
+                expr: EBlock(
+                  [
+                    macro array.sort(com.dongxiguo.protobuf.UnknownField.compare),
+                    {
+                      pos: Context.currentPos(),
+                      expr: EReturn(
+                        {
+                          pos: Context.currentPos(),
+                          expr: ENew(
+                          {
+                            pack: thisPack,
+                            name: thisName,
+                            params: [],
+                          },
+                          [ macro array ])
+                        }),
+                    },
+                  ]),
+              },
+            }),
+        }
+      ],
+    };
   }
 
   public function getBuilderDefinition(
     fullName:String,
     builderNameConverter:NameConverter.MessageNameConverter,
+    extensionSetNameConverter:NameConverter.UtilityNameConverter,
     enumNameConverter:NameConverter.EnumNameConverter):TypeDefinition
   {
-    return getMessageDefinition(fullName, builderNameConverter, enumNameConverter, false);
+    var builderDefinition =
+      getMessageDefinition(
+        fullName,
+        builderNameConverter,
+        enumNameConverter,
+        false);
+    var extensionSetPackage =
+      extensionSetNameConverter.getHaxePackage(fullName);
+    var extensionSetPackageExpr =
+      ExprTools.toFieldExpr(extensionSetPackage);
+    var extensionSetAbstractName =
+      extensionSetNameConverter.getHaxeClassName(fullName);
+    builderDefinition.fields.push(
+      {
+        name: "sortUnknownFields",
+        pos: Context.currentPos(),
+        access: [ APublic, AInline ],
+        kind: FFun(
+          {
+            args: [],
+            ret: null,
+            params: [],
+            expr: macro
+            {
+              return this.unknownFields == null ? null : $extensionSetPackageExpr.$extensionSetAbstractName.sortUnknownFields(this.unknownFields);
+            },
+          }),
+      });
+    return builderDefinition;
   }
 
 }

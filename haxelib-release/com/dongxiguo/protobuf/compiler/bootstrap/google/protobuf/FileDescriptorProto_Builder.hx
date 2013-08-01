@@ -1,5 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FileDescriptorProto_Builder {
+	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	@:optional public var name(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var package_(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	public var dependency(default,default):Array<com.dongxiguo.protobuf.Types.TYPE_STRING>;
@@ -19,5 +20,8 @@ class FileDescriptorProto_Builder {
 		this.enumType=[];
 		this.service=[];
 		this.extension=[];
+	}
+	public inline function sortUnknownFields() {
+		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorProto_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

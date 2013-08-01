@@ -1,5 +1,7 @@
 package com.dongxiguo.protobuf.binaryFormat;
 
+import haxe.io.Bytes;
+import haxe.io.BytesData;
 import sys.io.File;
 import sys.io.FileInput;
 import sys.FileSystem;
@@ -12,14 +14,14 @@ class BinaryFileInput implements IBinaryInput
 {
   var maxPosition:TYPE_UINT32;
   var underlyingInput:FileInput;
-  
+
   public function new(underlyingInput:FileInput, limit:TYPE_UINT32)
   {
     maxPosition = limit + underlyingInput.tell();
     this.underlyingInput = underlyingInput;
     underlyingInput.bigEndian = false;
   }
-  
+
   public function readUTFBytes(length:TYPE_UINT32):String
   {
     if (numBytesAvailable >= length)
@@ -31,7 +33,7 @@ class BinaryFileInput implements IBinaryInput
       throw Error.OutOfBounds;
     }
   }
-  
+
   public function readUnsignedByte():TYPE_UINT32
   {
     if (underlyingInput.tell() <= maxPosition)
@@ -43,21 +45,23 @@ class BinaryFileInput implements IBinaryInput
       throw Error.OutOfBounds;
     }
   }
-  
-  public function readBytes(length:TYPE_UINT32):TYPE_BYTES
+
+  public function readBytes(bytesData:BytesData, offset:TYPE_UINT32 = 0, length:TYPE_UINT32 = 0):Void
   {
+    if (length == 0)
+    {
+      length = numBytesAvailable;
+    }
     if (numBytesAvailable >= length)
     {
-      var result = TYPE_BYTES.alloc(length);
-      underlyingInput.readBytes(result, 0, length);
-      return result;
+      underlyingInput.readBytes(Bytes.ofData(bytesData), 0, length);
     }
     else
     {
       return throw Error.OutOfBounds;
     }
   }
-  
+
   public function readDouble():TYPE_DOUBLE
   {
     if (numBytesAvailable >= 8)
@@ -69,7 +73,7 @@ class BinaryFileInput implements IBinaryInput
       throw Error.OutOfBounds;
     }
   }
-  
+
   public function readFloat():TYPE_FLOAT
   {
     if (numBytesAvailable >= 4)
@@ -81,7 +85,7 @@ class BinaryFileInput implements IBinaryInput
       throw Error.OutOfBounds;
     }
   }
-  
+
   public function readInt():TYPE_INT32
   {
     if (numBytesAvailable >= 4)
@@ -97,12 +101,12 @@ class BinaryFileInput implements IBinaryInput
       throw Error.OutOfBounds;
     }
   }
-  
+
   public inline function get_numBytesAvailable():TYPE_UINT32
   {
     return maxPosition - underlyingInput.tell();
   }
- 
+
   public inline function set_numBytesAvailable(value:TYPE_UINT32):TYPE_UINT32
   {
     return maxPosition = underlyingInput.tell() + value;

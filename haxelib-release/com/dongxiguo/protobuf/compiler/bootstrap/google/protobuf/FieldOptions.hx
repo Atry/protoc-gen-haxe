@@ -1,5 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 typedef FieldOptions = {
+	@:optional public var unknownFields(default,null):Iterable<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
 	@:isVar public var ctype(get_ctype,set_ctype):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType>;
 	@:optional public var packed(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	@:isVar public var lazy(get_lazy,set_lazy):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;

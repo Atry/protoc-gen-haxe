@@ -1,4 +1,4 @@
-package com.dongxiguo.protobuf;
+package com.dongxiguo.protobuf.commandLine;
 import com.dongxiguo.protobuf.binaryFormat.BinaryFileInput;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.ProtoData;
@@ -11,6 +11,7 @@ import haxe.macro.Context;
 import sys.io.File;
 import sys.FileSystem;
 import com.dongxiguo.protobuf.binaryFormat.ReadUtils;
+import com.dongxiguo.protobuf.binaryFormat.WriteUtils;
 #if haxe3
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
@@ -21,7 +22,6 @@ private typedef IntMap<Value> = IntHash<Value>;
 using com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet_Merger;
 using com.dongxiguo.protobuf.compiler.BinaryFormat;
 
-import com.dongxiguo.protobuf.binaryFormat.WriteUtils;
 
 /**
   @author 杨博
@@ -81,6 +81,17 @@ class Importer
     }
   }
 
+  public static function defineAllExtensionSet(self:ProtoData):Void
+  {
+    for (fullName in self.messages.keys())
+    {
+      Context.defineType(
+        self.getExtensionSetDefinition(
+          fullName,
+          NameConverter.DEFAULT_EXTENSION_SET_NAME_CONVERTER));
+    }
+  }
+
   public static function defineAllBuilders(self:ProtoData):Void
   {
     for (fullName in self.messages.keys())
@@ -89,6 +100,7 @@ class Importer
         self.getBuilderDefinition(
           fullName,
           NameConverter.DEFAULT_BUILDER_NAME_CONVERTER,
+          NameConverter.DEFAULT_EXTENSION_SET_NAME_CONVERTER,
           NameConverter.DEFAULT_ENUM_NAME_CONVERTER));
     }
   }
@@ -125,6 +137,7 @@ class Importer
     var protoData = readProtoData(fileName);
     defineAllEnums(protoData);
     defineAllReadonlyMessages(protoData);
+    defineAllExtensionSet(protoData);
     defineAllBuilders(protoData);
     defineAllBinaryWriters(protoData);
     defineAllBinaryMergers(protoData);
