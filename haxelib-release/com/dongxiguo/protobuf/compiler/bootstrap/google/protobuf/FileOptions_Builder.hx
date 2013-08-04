@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FileOptions_Builder {
-	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
 	@:optional public var javaPackage(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var javaOuterClassname(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	static var __default_javaMultipleFiles(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
@@ -67,8 +67,5 @@ class FileOptions_Builder {
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
 	public function new() {
 		this.uninterpretedOption=[];
-	}
-	public inline function sortUnknownFields() {
-		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileOptions_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

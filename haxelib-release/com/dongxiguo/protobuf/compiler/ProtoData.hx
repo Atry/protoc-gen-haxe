@@ -7,6 +7,7 @@ import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueDescri
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.ServiceDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
+import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
 import haxe.io.BytesData;
 import haxe.io.BytesOutput;
@@ -14,6 +15,7 @@ import haxe.macro.Expr;
 import haxe.Int64;
 import haxe.macro.Context;
 import haxe.macro.ExprTools;
+import haxe.PosInfos;
 using StringTools;
 #if haxe3
 import haxe.ds.StringMap;
@@ -26,17 +28,32 @@ private typedef StringMap<Value> = Hash<Value>;
  */
 @:final class ProtoData
 {
-  public var fileDescriptorSet(default, null):FileDescriptorSet;
+
+  /**
+    The key of this map is fully qualified type name, which starts with a dot.
+  **/
   public var messages(default, null):ReadonlyStringMap<DescriptorProto>;
+
+  /**
+    The key of this map is fully qualified type name, which starts with a dot.
+  **/
   public var enums(default, null):ReadonlyStringMap<EnumDescriptorProto>;
+
+  /**
+    The key of this map is fully qualified package name,
+    which does NOT start with a dot.
+    For global package, the key is a string with zero length.
+  **/
+  public var packages(default, null):ReadonlyStringMap<Iterable<FileDescriptorProto>>;
 
   public function new(fileDescriptorSet:FileDescriptorSet)
   {
-    var messageMap:StringMap<DescriptorProto> = new StringMap<DescriptorProto>();
-    var enumMap:StringMap<EnumDescriptorProto> = new StringMap<EnumDescriptorProto>();
-    messages = messageMap;
-    enums = enumMap;
-    this.fileDescriptorSet = fileDescriptorSet;
+    var messageMap = new StringMap<DescriptorProto>();
+    var enumMap = new StringMap<EnumDescriptorProto>();
+    var packageMap = new StringMap<Array<FileDescriptorProto>>();
+    this.messages = messageMap;
+    this.enums = enumMap;
+    this.packages = packageMap;
     function addNestedMessagesAndEnums(prefix:String, messages:Iterable<DescriptorProto>):Void
     {
       for (message in messages)
@@ -54,12 +71,28 @@ private typedef StringMap<Value> = Hash<Value>;
 
     for (file in fileDescriptorSet.file)
     {
-      var prefix = file.package_ == null ? "." : '.${file.package_}.';
-      for (p in file.enumType)
       {
-        enumMap.set(prefix + p.name, p);
+        var packageString = file.package_;
+        if (packageString == null)
+        {
+          packageString = "";
+        }
+        var array = packageMap.get(packageString);
+        if (array == null)
+        {
+          array = [];
+          packageMap.set(packageString, array);
+        }
+        array.push(file);
       }
-      addNestedMessagesAndEnums(prefix, file.messageType);
+      {
+        var prefix = file.package_ == null ? "." : '.${file.package_}.';
+        for (p in file.enumType)
+        {
+          enumMap.set(prefix + p.name, p);
+        }
+        addNestedMessagesAndEnums(prefix, file.messageType);
+      }
     }
 
     // TODO: Extension
@@ -102,6 +135,7 @@ private typedef StringMap<Value> = Hash<Value>;
     //}
   }
 
+  @:noUsing
   public static function resolve<ProtoData>(map:ReadonlyStringMap<ProtoData>, from:String, path:String):String
   {
     if (path.startsWith("."))
@@ -112,27 +146,24 @@ private typedef StringMap<Value> = Hash<Value>;
       }
       else
       {
-        return throw 'Cannot find out $path from $from.';
+        return throw 'Cannot find out absolute type $path.';
       }
     }
     else
     {
-      var result = '$from.$path';
-      if (map.exists(result))
+      while (from != "")
       {
-        return result;
-      }
-      else
-      {
-        if (from == "")
+        var result = '$from.$path';
+        if (map.exists(result))
         {
-          return throw 'Cannot find out $path from $from.';
+          return result;
         }
         else
         {
-          return resolve(map, from.substring(0, from.lastIndexOf(".")), path);
+          from = from.substring(0, from.lastIndexOf("."));
         }
       }
+      return throw 'Cannot find out relative type $path from $from.';
     }
   }
 
@@ -176,7 +207,8 @@ private typedef StringMap<Value> = Hash<Value>;
     }
   }
 
-  static function makeDefaultValueExpr(
+  @:noUsing
+  public static function makeDefaultValueExpr(
     enclosingMessage:String,
     field:FieldDescriptorProto,
     enumMap:ReadonlyStringMap<EnumDescriptorProto>,
@@ -188,7 +220,7 @@ private typedef StringMap<Value> = Hash<Value>;
       {
         var defaultValueStringExpr =
         {
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           expr: EConst(CString(field.defaultValue)),
         };
         return macro com.dongxiguo.protobuf.EscapedBytesParser.parseBytes($defaultValueStringExpr);
@@ -199,21 +231,52 @@ private typedef StringMap<Value> = Hash<Value>;
         var haxeNameParts = nameConverter.getHaxePackage(field.typeName);
         haxeNameParts.push(nameConverter.getHaxeEnumName(field.typeName));
         haxeNameParts.push(nameConverter.toHaxeEnumConstructorName(field.defaultValue));
-        return Context.parse(haxeNameParts.join("."), Context.currentPos());
+        return ExprTools.toFieldExpr(haxeNameParts);
       }
       case Type.TYPE_INT64, TYPE_UINT64, TYPE_FIXED64, TYPE_SFIXED64, TYPE_SINT64:
       {
         var defaultValueStringExpr =
         {
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           expr: EConst(CString(field.defaultValue)),
         };
         return macro com.dongxiguo.protobuf.Int64Parser.parseInt64($defaultValueStringExpr);
       }
+      case Type.TYPE_INT32, Type.TYPE_UINT32, Type.TYPE_FIXED32, Type.TYPE_SFIXED32, Type.TYPE_SINT32:
+      {
+        return
+        {
+          pos: makeMacroPosition(),
+          expr: EConst(CInt(field.defaultValue)),
+        };
+      }
+      case Type.TYPE_BOOL:
+      {
+        return
+        {
+          pos: makeMacroPosition(),
+          expr: EConst(CIdent(field.defaultValue)),
+        }
+      }
+      case Type.TYPE_DOUBLE, Type.TYPE_FLOAT:
+      {
+        return
+        {
+          pos: makeMacroPosition(),
+          expr: EConst(CFloat(field.defaultValue)),
+        }
+      }
+      case Type.TYPE_STRING:
+      {
+        return
+        {
+          pos: makeMacroPosition(),
+          expr: EConst(CString(field.defaultValue)),
+        }
+      }
       default:
       {
-        var defaultValue = parseDefaultValue(field);
-        return Context.makeExpr(defaultValue, Context.currentPos());
+        throw '${field.type} must not have default value';
       }
     }
   }
@@ -225,7 +288,7 @@ private typedef StringMap<Value> = Hash<Value>;
   {
     var haxeEnumName = enumNameConverter.getHaxeEnumName(fullName);
     var haxeEnumPackage = enumNameConverter.getHaxePackage(fullName);
-    var enumPackageExpr = Context.parse(haxeEnumPackage.join("."), Context.currentPos());
+    var enumPackageExpr = ExprTools.toFieldExpr(haxeEnumPackage);
     var enumExpr = macro $enumPackageExpr.$haxeEnumName;
 
     var valueOfCases =
@@ -235,7 +298,13 @@ private typedef StringMap<Value> = Hash<Value>;
         var constructorName = enumNameConverter.toHaxeEnumConstructorName(value.name);
         {
           guard: null,
-          values: [ Context.makeExpr(value.number, Context.currentPos()), ],
+          values:
+          [
+            {
+              pos: makeMacroPosition(),
+              expr: EConst(CInt(Std.string(value.number))),
+            }
+          ],
           expr: macro { $enumExpr.$constructorName; },
         }
       }
@@ -249,7 +318,11 @@ private typedef StringMap<Value> = Hash<Value>;
         {
           guard: null,
           values: [ macro $enumExpr.$constructorName, ],
-          expr: Context.makeExpr(value.number, Context.currentPos()),
+          expr:
+          {
+            pos: makeMacroPosition(),
+            expr: EConst(CInt(Std.string(value.number))),
+          },
         }
       }
     ];
@@ -258,7 +331,7 @@ private typedef StringMap<Value> = Hash<Value>;
     {
       pack: enumParserNameConverter.getHaxePackage(fullName),
       name: enumParserNameConverter.getHaxeClassName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: [],
       params: [],
       isExtern: false,
@@ -269,7 +342,7 @@ private typedef StringMap<Value> = Hash<Value>;
           name: "getNumber",
           access: [ AStatic, APublic ],
           meta: [],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           kind: FFun(
             {
               args:
@@ -294,10 +367,10 @@ private typedef StringMap<Value> = Hash<Value>;
                 }),
               expr:
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EReturn(
                   {
-                    pos: Context.currentPos(),
+                    pos: makeMacroPosition(),
                     expr: ESwitch(macro enumValue, getNumberCases, null),
                   }),
               },
@@ -308,7 +381,7 @@ private typedef StringMap<Value> = Hash<Value>;
           name: "valueOf",
           access: [ AStatic, APublic ],
           meta: [],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           kind: FFun(
             {
               args:
@@ -333,10 +406,10 @@ private typedef StringMap<Value> = Hash<Value>;
                 }),
               expr:
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EReturn(
                   {
-                    pos: Context.currentPos(),
+                    pos: makeMacroPosition(),
                     expr: ESwitch(
                       macro number,
                       valueOfCases,
@@ -364,9 +437,15 @@ private typedef StringMap<Value> = Hash<Value>;
       fields.push(
         {
           access: [ AStatic, APublic, ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           name: enumNameConverter.toHaxeEnumConstructorName(value.name),
-          kind: FProp("default", "never", null, Context.makeExpr(value.number, Context.currentPos())),
+          kind: FProp(
+            "default", "never",
+            null,
+            {
+              pos: makeMacroPosition(),
+              expr: EConst(CInt(Std.string(value.number))),
+            }),
         });
     }
 
@@ -378,7 +457,7 @@ private typedef StringMap<Value> = Hash<Value>;
         name: "valueOf",
         access: [ AStatic, APublic ],
         meta: [],
-        pos: Context.currentPos(),
+        pos: makeMacroPosition(),
         kind: FFun(
           {
             args:
@@ -410,7 +489,7 @@ private typedef StringMap<Value> = Hash<Value>;
         name: "getNumber",
         access: [ AStatic, APublic ],
         meta: [],
-        pos: Context.currentPos(),
+        pos: makeMacroPosition(),
         kind: FFun(
           {
             args:
@@ -441,17 +520,37 @@ private typedef StringMap<Value> = Hash<Value>;
     {
       pack: enumClassNameConverter.getHaxePackage(fullName),
       name: enumClassNameConverter.getHaxeClassName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: [{
           name: ":native",
-          pos: Context.currentPos(),
-          params: [ Context.makeExpr(nativeName, Context.currentPos()) ],
+          pos: makeMacroPosition(),
+          params:
+          [
+            {
+              pos: makeMacroPosition(),
+              expr: EConst(CString(nativeName)),
+            }
+          ],
         }],
       params: [],
       isExtern: false,
       kind: TDClass(),
       fields: fields,
     };
+  }
+
+  static function makeMacroPosition(?posInfos:PosInfos):Position
+  {
+    #if macro
+    return Context.currentPos();
+    #else
+    return
+    {
+      min: 0,
+      max: 0,
+      file: posInfos.fileName,
+    };
+    #end
   }
 
   function getEnumDefinition(
@@ -466,7 +565,7 @@ private typedef StringMap<Value> = Hash<Value>;
       fields.push(
         {
           access: [],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           name: enumNameConverter.toHaxeEnumConstructorName(value.name),
           kind: FVar(null),
         });
@@ -484,12 +583,12 @@ private typedef StringMap<Value> = Hash<Value>;
     {
       pack: enumNameConverter.getHaxePackage(fullName),
       name: enumNameConverter.getHaxeEnumName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: isFakeEnum ?
       [
         {
           name: ":fakeEnum",
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           params: [ macro StdTypes.Int ],
         }
       ] : [],
@@ -568,7 +667,7 @@ private typedef StringMap<Value> = Hash<Value>;
             params: [],
             sub: protoType.enumConstructor(),
             name: "Types",
-            pack: ["com", "dongxiguo", "protobuf"],
+            pack: [ "com", "dongxiguo", "protobuf" ],
           });
         }
       }
@@ -577,13 +676,13 @@ private typedef StringMap<Value> = Hash<Value>;
       {
         name: "unknownFields",
         access: [ APublic ],
-        pos: Context.currentPos(),
+        pos: makeMacroPosition(),
         meta:
         [
           {
             name: ":optional",
             params: [],
-            pos: Context.currentPos(),
+            pos: makeMacroPosition(),
           },
         ],
         kind: FProp(
@@ -591,9 +690,10 @@ private typedef StringMap<Value> = Hash<Value>;
           readonly ? "null" : "default",
            TPath(
               {
-                pack: [],
-                name: readonly ? "Iterable" : "Array",
-                params: [TPType(UNKNOWN_FIELD_COMPLEX_TYPE)],
+                pack: [ "com", "dongxiguo", "protobuf" ],
+                name: "UnknownField",
+                sub: readonly ? "ReadonlyUnknownFieldMap" : "UnknownFieldMap",
+                params: [],
               })),
       }];
     var messageProto = messages.get(fullName);
@@ -608,7 +708,7 @@ private typedef StringMap<Value> = Hash<Value>;
           fields.push(
           {
             name: haxeFieldName,
-            pos: Context.currentPos(),
+            pos: makeMacroPosition(),
             access: [APublic],
             kind: FProp("default", readonly ? "null" : "default", toHaxeType(field.type, field.typeName)),
           });
@@ -624,9 +724,9 @@ private typedef StringMap<Value> = Hash<Value>;
           {
             fields.push(
             {
-              meta: [ { params: [], pos: Context.currentPos(), name: ":optional", }, ],
+              meta: [ { params: [], pos: makeMacroPosition(), name: ":optional", }, ],
               name: haxeFieldName,
-              pos: Context.currentPos(),
+              pos: makeMacroPosition(),
               access: [ APublic ],
               kind: FProp("default", readonly ? "null" : "default", TPath(
                 {
@@ -646,13 +746,13 @@ private typedef StringMap<Value> = Hash<Value>;
               var defaultFieldName = "__default_" + haxeFieldName;
               var haxeFieldExpr =
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EConst(CIdent(haxeFieldName)),
               }
               fields.push(
               {
                 name: defaultFieldName,
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 access: [ AStatic ],
                 kind: FProp("null", "never",
                   TPath(
@@ -666,7 +766,7 @@ private typedef StringMap<Value> = Hash<Value>;
               });
               var defaultFieldExpr =
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EConst(CIdent(defaultFieldName)),
               }
 
@@ -674,7 +774,7 @@ private typedef StringMap<Value> = Hash<Value>;
               {
                 name: setterName,
                 access: [ AInline ],
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 kind: FFun(
                 {
                   ret: null,
@@ -687,7 +787,7 @@ private typedef StringMap<Value> = Hash<Value>;
               {
                 name: getterName,
                 access: [ AInline ],
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 kind: FFun(
                 {
                   ret: null,
@@ -708,9 +808,9 @@ private typedef StringMap<Value> = Hash<Value>;
             fields.push(
             {
               name: haxeFieldName,
-              pos: Context.currentPos(),
+              pos: makeMacroPosition(),
               access: [ APublic ],
-              meta: [ { name: ":isVar", params: [], pos: Context.currentPos(), }, ],
+              meta: [ { name: ":isVar", params: [], pos: makeMacroPosition(), }, ],
               kind: FProp(
                 getterName,
                 setterName,
@@ -729,7 +829,7 @@ private typedef StringMap<Value> = Hash<Value>;
           fields.push(
           {
             name: haxeFieldName,
-            pos: Context.currentPos(),
+            pos: makeMacroPosition(),
             access: [APublic],
             kind: FProp("default", readonly ? "null" : "default", TPath(
               {
@@ -750,7 +850,7 @@ private typedef StringMap<Value> = Hash<Value>;
       fields.push(
         {
           name: "new",
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           access: [ APublic ],
           kind: FFun(
           {
@@ -760,7 +860,7 @@ private typedef StringMap<Value> = Hash<Value>;
             expr:
             {
               expr: EBlock(constructorBlock),
-              pos: Context.currentPos(),
+              pos: makeMacroPosition(),
             }
           })
         });
@@ -769,7 +869,7 @@ private typedef StringMap<Value> = Hash<Value>;
     {
       pack: messageNameConverter.getHaxePackage(fullName),
       name: messageNameConverter.getHaxeClassName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: [],
       params: [],
       isExtern: false,
@@ -790,143 +890,16 @@ private typedef StringMap<Value> = Hash<Value>;
       true);
   }
 
-  static var ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE = ComplexType.TPath(
-  {
-    pack: [],
-    name: "Array",
-    params: [ TPType(UNKNOWN_FIELD_COMPLEX_TYPE) ],
-  });
-
-  static var EXTENSION_SET_KIND(default, never) = TypeDefKind.TDAbstract(
-    ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
-    null,
-    [ ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE ]);
-
-  static var EXTENSION_SET_NEW_FIELD(default, never):Field =
-  {
-    name: "new",
-    pos: Context.currentPos(),
-    access: [ AInline ],
-    kind: FFun(
-      {
-        args:
-        [
-          {
-            name: "sortedArray",
-            opt: false,
-            type: ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
-          }
-        ],
-        ret: null,
-        params: [],
-        expr: macro { this = sortedArray; },
-      }),
-  };
-
-  public function getExtensionSetDefinition(
-    fullName:String,
-    extensionSetNameConverter:NameConverter.UtilityNameConverter):TypeDefinition
-  {
-    var thisPack = extensionSetNameConverter.getHaxePackage(fullName);
-    var thisPackExpr = ExprTools.toFieldExpr(thisPack);
-    var thisName = extensionSetNameConverter.getHaxeClassName(fullName);
-    return
-    {
-      pack: thisPack,
-      name: thisName,
-      pos: Context.currentPos(),
-      meta: [],
-      params: [],
-      isExtern: false,
-      kind: EXTENSION_SET_KIND,
-      fields:
-      [
-        EXTENSION_SET_NEW_FIELD,
-        {
-          name: "sortUnknownFields",
-          pos: Context.currentPos(),
-          access: [ APublic, AStatic, AInline ],
-          meta: [],
-          kind: FFun(
-            {
-              args:
-              [
-                {
-                  name: "array",
-                  opt: false,
-                  type: ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
-                }
-              ],
-              ret: TPath(
-                {
-                  pack: thisPack,
-                  name: thisName,
-                  params: [],
-                }),
-              params: [],
-              expr:
-              {
-                pos: Context.currentPos(),
-                expr: EBlock(
-                  [
-                    macro array.sort(com.dongxiguo.protobuf.UnknownField.compare),
-                    {
-                      pos: Context.currentPos(),
-                      expr: EReturn(
-                        {
-                          pos: Context.currentPos(),
-                          expr: ENew(
-                          {
-                            pack: thisPack,
-                            name: thisName,
-                            params: [],
-                          },
-                          [ macro array ])
-                        }),
-                    },
-                  ]),
-              },
-            }),
-        }
-      ],
-    };
-  }
-
   public function getBuilderDefinition(
     fullName:String,
     builderNameConverter:NameConverter.MessageNameConverter,
-    extensionSetNameConverter:NameConverter.UtilityNameConverter,
     enumNameConverter:NameConverter.EnumNameConverter):TypeDefinition
   {
-    var builderDefinition =
-      getMessageDefinition(
-        fullName,
-        builderNameConverter,
-        enumNameConverter,
-        false);
-    var extensionSetPackage =
-      extensionSetNameConverter.getHaxePackage(fullName);
-    var extensionSetPackageExpr =
-      ExprTools.toFieldExpr(extensionSetPackage);
-    var extensionSetAbstractName =
-      extensionSetNameConverter.getHaxeClassName(fullName);
-    builderDefinition.fields.push(
-      {
-        name: "sortUnknownFields",
-        pos: Context.currentPos(),
-        access: [ APublic, AInline ],
-        kind: FFun(
-          {
-            args: [],
-            ret: null,
-            params: [],
-            expr: macro
-            {
-              return this.unknownFields == null ? null : $extensionSetPackageExpr.$extensionSetAbstractName.sortUnknownFields(this.unknownFields);
-            },
-          }),
-      });
-    return builderDefinition;
+    return getMessageDefinition(
+      fullName,
+      builderNameConverter,
+      enumNameConverter,
+      false);
   }
 
 }
@@ -943,10 +916,10 @@ typedef ReadonlyStringMap<Element> =
 private enum FakeEnumBehavior
 {
 
-  /** Every enums in proto files must be [@:fakeEnum] */
+  /** Every enums in proto packages must be [@:fakeEnum] */
   ALWAYS;
 
-  /** Every enums in proto files must not be [@:fakeEnum] */
+  /** Every enums in proto packages must not be [@:fakeEnum] */
   NEVER;
 
   /**

@@ -12,4 +12,8 @@ enum Error
   MalformedVarint;
   MalformedEnumConstructor;
   TruncatedMessage;
+  InvalidWireType;
+  MissingRequiredFields;
+  DuplicatedValueForNonRepeatedField;
+  MalformedBoolean;
 }

@@ -67,7 +67,10 @@ package com.dongxiguo.protobuf.compiler;
 
   public static function getClassName(fullyQualifiedName:String):String
   {
-    return fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf(".") + 1);
+    var lastDot = fullyQualifiedName.lastIndexOf(".");
+    return
+      fullyQualifiedName.charAt(lastDot + 1).toUpperCase() +
+      fullyQualifiedName.substring(lastDot + 2);
   }
 
   public static function identity(name:String):String
@@ -87,108 +90,6 @@ package com.dongxiguo.protobuf.compiler;
     return [ for (keyword in keywords) KEYWORD_EREG.replace(keyword, "$1_") ];
   }
 
-  public static var DEFAULT_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName);
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-    toHaxeFieldName: function(fieldName:String):String
-    {
-      return replaceKeyword(lowerCaseUnderlineToLowerCamelCase(fieldName));
-    },
-  };
-
-  public static var DEFAULT_BUILDER_NAME_CONVERTER(default, never):MessageNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName) + "_Builder";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-    toHaxeFieldName: function(fieldName:String):String
-    {
-      return replaceKeyword(lowerCaseUnderlineToLowerCamelCase(fieldName));
-    },
-  };
-
-  public static var DEFAULT_ENUM_NAME_CONVERTER(default, never):EnumNameConverter =
-  {
-    toHaxeEnumConstructorName: replaceKeyword,
-    getHaxeEnumName: getClassName,
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  };
-
-  public static var DEFAULT_EXTENSION_SET_NAME_CONVERTER(default, never):UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName) + "_ExtensionSet";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  }
-
-  public static var DEFAULT_EXTENSION_NAME_CONVERTER(default, never):ExtensionNameConverter =
-  {
-    nestedMessageToHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(asLowerCamelCasePackage(fullyQualifiedName));
-    },
-    toHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(asLowerCamelCasePackage(fullyQualifiedName));
-    },
-    toHaxeClassName: lowerCaseUnderlineToUpperCamelCase,
-  };
-
-  public static var DEFAULT_MERGER_NAME_CONVERTER(default, never):UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName) + "_Merger";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  };
-
-  public static var DEFAULT_WRITER_NAME_CONVERTER(default, never):UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName) + "_Writer";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  };
-
-  public static var DEFAULT_ENUM_CLASS_NAME_CONVERTER(default, never):UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return getClassName(protoFullyQualifiedName) + "_EnumClass";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return replaceKeywords(getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  };
 }
 
 typedef MessageNameConverter =
@@ -211,10 +112,9 @@ typedef UtilityNameConverter =
   function getHaxePackage(protoFullyQualifiedName:String):Array<String>;
 }
 
-typedef ExtensionNameConverter =
+typedef PackageExtensionNameConverter =
 {
-  function nestedMessageToHaxePackage(protoMessageFullyQualifiedName:String):Array<String>;
-  function toHaxePackage(protoPackageName:String):Array<String>;
-  /** 每个Extension都是一个类，本函数返回类名 */
-  function toHaxeClassName(protoExtendsionName:String):String;
+  function toHaxeFieldName(protoFieldName:String):String;
+  function getHaxeClassName(protoPackageName:String):String;
+  function getHaxePackage(protoPackageName:String):Array<String>;
 }

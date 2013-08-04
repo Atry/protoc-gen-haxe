@@ -12,6 +12,7 @@ import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptor
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.ExprTools;
+import haxe.PosInfos;
 
 #if haxe3
 import haxe.ds.IntMap;
@@ -57,6 +58,29 @@ class BinaryFormat
       params: [],
     });
 
+  static function makeMacroPosition(?posInfos:PosInfos):Position
+  {
+    #if macro
+    return Context.currentPos();
+    #else
+    return
+    {
+      min: 0,
+      max: 0,
+      file: posInfos.fileName,
+    };
+    #end
+  }
+
+  static function makeTagExpr(tag:Int):Expr
+  {
+    return
+    {
+      pos: makeMacroPosition(),
+      expr: EConst(CInt(Std.string(tag))),
+    };
+  }
+
   public static function getMergerDefinition(
     self:ProtoData,
     fullName:String,
@@ -79,7 +103,7 @@ class BinaryFormat
     };
     var newFieldMapExpr =
     {
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       expr: ENew(fieldMapTypePath, []),
     }
     var insertions = [];
@@ -107,16 +131,15 @@ class BinaryFormat
             ExprTools.toFieldExpr(nestedMergerPackage);
           var nestedMergerName =
             mergerNameConverter.getHaxeClassName(resolvedFieldTypeName);
-          var nestedFieldMapExpr = macro $nestedMergerPackageExpr.$nestedMergerName.FIELD_MAP;
           var newFieldBuilderExpr =
           {
             expr: ENew(fieldBuilderTypePath, []),
-            pos: Context.currentPos(),
+            pos: makeMacroPosition(),
           };
           macro
           {
             var fieldBuilder = $newFieldBuilderExpr;
-            com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeDelimitedFrom($nestedFieldMapExpr, fieldBuilder, input);
+            $nestedMergerPackageExpr.$nestedMergerName.mergeDelimitedFrom(fieldBuilder, input);
             fieldBuilder;
           };
         }
@@ -149,12 +172,11 @@ class BinaryFormat
         case WireType.LENGTH_DELIMITED:
         {
           // Types that does not support packed repeated fields.
-          var tagExpr = Context.makeExpr(
-            WireType.byType(field.type) | (field.number << 3),
-            Context.currentPos());
+          var tagExpr =
+            makeTagExpr(WireType.byType(field.type) | (field.number << 3));
           var functionExpr =
           {
-            pos: Context.currentPos(),
+            pos: makeMacroPosition(),
             expr: EFunction(
               null,
               {
@@ -191,16 +213,15 @@ class BinaryFormat
         default:
         {
           // Types that supports packed repeated fields.
-          var nonPackedTagExpr = Context.makeExpr(
-            WireType.byType(field.type) | (field.number << 3),
-            Context.currentPos());
+          var nonPackedTagExpr =
+            makeTagExpr(WireType.byType(field.type) | (field.number << 3));
           switch (field.label)
           {
             case LABEL_REQUIRED, LABEL_OPTIONAL:
             {
               var functionExpr =
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EFunction(
                   null,
                   {
@@ -228,7 +249,7 @@ class BinaryFormat
             {
               var nonPackedFunctionExpr =
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EFunction(
                   null,
                   {
@@ -251,12 +272,12 @@ class BinaryFormat
                   }),
               }
               insertions.push(macro fieldMap.set($nonPackedTagExpr, $nonPackedFunctionExpr));
-              var packedTagExpr = Context.makeExpr(
-                WireType.LENGTH_DELIMITED | (field.number << 3),
-                Context.currentPos());
+              var packedTagExpr =
+                makeTagExpr(
+                  WireType.LENGTH_DELIMITED | (field.number << 3));
               var packedFunctionExpr =
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EFunction(
                   null,
                   {
@@ -294,14 +315,11 @@ class BinaryFormat
         }
       }
     }
-
-    // TODO: Extension
-
     return
     {
       pack: mergerNameConverter.getHaxePackage(fullName),
       name: mergerNameConverter.getHaxeClassName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: [],
       params: [],
       isExtern: false,
@@ -310,17 +328,17 @@ class BinaryFormat
       [
         {
           name: "FIELD_MAP",
-          access: [ APublic, AStatic ],
-          pos: Context.currentPos(),
+          access: [ AStatic ],
+          pos: makeMacroPosition(),
           kind: FProp(
             "default", "never", TPath(fieldMapTypePath),
             {
-              pos: Context.currentPos(),
+              pos: makeMacroPosition(),
               expr: EBlock(
                 [
                   (macro var fieldMap = $newFieldMapExpr),
                   {
-                    pos: Context.currentPos(),
+                    pos: makeMacroPosition(),
                     expr: EBlock(insertions),
                   },
                   macro fieldMap,
@@ -330,14 +348,14 @@ class BinaryFormat
         {
           name: "mergeFrom",
           access: [ APublic, AStatic, AInline ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           meta: [],
           kind: FFun(MERGE_FROM_FUNCTION)
         },
         {
           name: "mergeDelimitedFrom",
           access: [ APublic, AStatic, AInline ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           meta: [],
           kind: FFun(MERGE_DELIMITED_FROM_FUNCTION)
         }
@@ -350,6 +368,9 @@ class BinaryFormat
     {
       var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
       writeFields(message, buffer);
+      com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
+        buffer,
+        message.unknownFields);
       buffer.toNormal(output);
     })
     {
@@ -363,6 +384,9 @@ class BinaryFormat
       var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
       var i = buffer.beginBlock();
       writeFields(message, buffer);
+      com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
+        buffer,
+        message.unknownFields);
       buffer.endBlock(i);
       buffer.toNormal(buffer);
     })
@@ -396,7 +420,7 @@ class BinaryFormat
     {
       pack: writerNameConverter.getHaxePackage(fullName),
       name: writerNameConverter.getHaxeClassName(fullName),
-      pos: Context.currentPos(),
+      pos: makeMacroPosition(),
       meta: [],
       params: [],
       isExtern: false,
@@ -406,7 +430,7 @@ class BinaryFormat
         {
           name: "writeFields",
           access: [ AStatic, APublic ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           meta: [],
           kind: FFun(
             {
@@ -429,10 +453,9 @@ class BinaryFormat
               ret: null,
               expr:
               {
-                pos: Context.currentPos(),
+                pos: makeMacroPosition(),
                 expr: EBlock(
                   [
-                    // TODO: UnknownFields
                     for (field in self.messages.get(fullName).field)
                     {
                       if (field.extendee != null)
@@ -444,9 +467,9 @@ class BinaryFormat
                       {
                         case ProtobufType.TYPE_GROUP:
                         {
-                          Context.warning("TYPE_GROUP is unsupported!", Context.currentPos());
+                          Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
                           {
-                            pos: Context.currentPos(),
+                            pos: makeMacroPosition(),
                             expr: EBlock([]),
                           }
                         }
@@ -493,9 +516,9 @@ class BinaryFormat
                       {
                         case LABEL_OPTIONAL:
                         {
-                          var tagExpr = Context.makeExpr(
-                            WireType.byType(field.type) | (field.number << 3),
-                            Context.currentPos());
+                          var tagExpr =
+                            makeTagExpr(
+                              WireType.byType(field.type) | (field.number << 3));
                           macro
                           {
                             var fieldValue = message.$fieldName;
@@ -508,9 +531,9 @@ class BinaryFormat
                         }
                         case LABEL_REQUIRED:
                         {
-                          var tagExpr = Context.makeExpr(
-                            WireType.byType(field.type) | (field.number << 3),
-                            Context.currentPos());
+                          var tagExpr =
+                            makeTagExpr(
+                              WireType.byType(field.type) | (field.number << 3));
                           macro
                           {
                             var fieldValue = message.$fieldName;
@@ -522,9 +545,9 @@ class BinaryFormat
                         {
                           if (field.options != null && field.options.packed)
                           {
-                            var tagExpr = Context.makeExpr(
-                              WireType.LENGTH_DELIMITED | (field.number << 3),
-                              Context.currentPos());
+                            var tagExpr =
+                              makeTagExpr(
+                                WireType.LENGTH_DELIMITED | (field.number << 3));
                             macro
                             {
                               com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $tagExpr);
@@ -538,9 +561,9 @@ class BinaryFormat
                           }
                           else
                           {
-                            var tagExpr = Context.makeExpr(
-                              WireType.byType(field.type) | (field.number << 3),
-                              Context.currentPos());
+                            var tagExpr =
+                              makeTagExpr(
+                                WireType.byType(field.type) | (field.number << 3));
                             macro
                             {
                               for (fieldValue in message.$fieldName)
@@ -560,14 +583,14 @@ class BinaryFormat
         {
           name: "writeTo",
           access: [ APublic, AStatic, AInline ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           meta: [],
           kind: FFun(WRITE_TO_FUNCTION)
         },
         {
           name: "writeDelimitedTo",
           access: [ APublic, AStatic, AInline ],
-          pos: Context.currentPos(),
+          pos: makeMacroPosition(),
           meta: [],
           kind: FFun(WRITE_DELIMITED_TO_FUNCTION)
         }

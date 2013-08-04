@@ -2,20 +2,18 @@ package com.dongxiguo.protobuf.binaryFormat;
 
 import haxe.io.Bytes;
 import haxe.io.BytesData;
-import sys.io.File;
-import sys.io.FileInput;
-import sys.FileSystem;
+import haxe.io.BytesInput;
 import com.dongxiguo.protobuf.Types;
 
 /**
  * @author 杨博
  */
-class BinaryFileInput implements IBinaryInput
+class BinaryBytesInput implements IBinaryInput
 {
   var maxPosition:TYPE_UINT32;
-  var underlyingInput:FileInput;
+  var underlyingInput:BytesInput;
 
-  public function new(underlyingInput:FileInput, numBytesAvailable:TYPE_UINT32)
+  public function new(underlyingInput:BytesInput, limit:TYPE_UINT32)
   {
     underlyingInput.bigEndian = false;
     this.underlyingInput = underlyingInput;
@@ -36,7 +34,7 @@ class BinaryFileInput implements IBinaryInput
 
   public function readUnsignedByte():TYPE_UINT32
   {
-    if (underlyingInput.tell() <= maxPosition)
+    if (cast(underlyingInput.position, TYPE_UINT32) <= maxPosition)
     {
       return underlyingInput.readByte();
     }
@@ -104,12 +102,12 @@ class BinaryFileInput implements IBinaryInput
 
   public inline function get_numBytesAvailable():TYPE_UINT32
   {
-    return maxPosition - underlyingInput.tell();
+    return maxPosition - underlyingInput.position;
   }
 
   public inline function set_numBytesAvailable(value:TYPE_UINT32):TYPE_UINT32
   {
-    return maxPosition = underlyingInput.tell() + value;
+    return maxPosition = underlyingInput.position + value;
   }
 
   public var numBytesAvailable(get_numBytesAvailable, set_numBytesAvailable):TYPE_UINT32;

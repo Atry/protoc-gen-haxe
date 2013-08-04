@@ -21,13 +21,163 @@ private typedef IntMap<Value> = IntHash<Value>;
 #end
 using com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet_Merger;
 using com.dongxiguo.protobuf.compiler.BinaryFormat;
-
+using com.dongxiguo.protobuf.compiler.Extension;
 
 /**
   @author 杨博
 **/
 class Importer
 {
+
+  public static var DEFAULT_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName);
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_BUILDER_NAME_CONVERTER(default, never):MessageNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_Builder";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_ENUM_NAME_CONVERTER(default, never):EnumNameConverter =
+  {
+    toHaxeEnumConstructorName: NameConverter.replaceKeyword,
+    getHaxeEnumName: NameConverter.getClassName,
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  };
+
+  public static var DEFAULT_PACKAGE_SETTER_NAME_CONVERTER(default, never):PackageExtensionNameConverter =
+  {
+    getHaxeClassName: function(protoPackageName:String):String
+    {
+      if (protoPackageName == ".")
+      {
+        return "Setter";
+      }
+      else
+      {
+        return NameConverter.getClassName(protoPackageName) + "_Setter";
+      }
+    },
+    getHaxePackage: function(protoPackageName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(protoPackageName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_PACKAGE_GETTER_NAME_CONVERTER(default, never):PackageExtensionNameConverter =
+  {
+    getHaxeClassName: function(protoPackageName:String):String
+    {
+      return NameConverter.getClassName(protoPackageName) + "_Getter";
+    },
+    getHaxePackage: function(protoPackageName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(protoPackageName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_MESSAGE_SETTER_NAME_CONVERTER(default, never):MessageNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_Setter";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_MESSAGE_GETTER_NAME_CONVERTER(default, never):MessageNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_Getter";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
+  };
+
+  public static var DEFAULT_MERGER_NAME_CONVERTER(default, never):UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_Merger";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  };
+
+  public static var DEFAULT_WRITER_NAME_CONVERTER(default, never):UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_Writer";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  };
+
+  public static var DEFAULT_ENUM_CLASS_NAME_CONVERTER(default, never):UtilityNameConverter =
+  {
+    getHaxeClassName: function(protoFullyQualifiedName:String):String
+    {
+      return NameConverter.getClassName(protoFullyQualifiedName) + "_EnumClass";
+    },
+    getHaxePackage: function(fullyQualifiedName:String):Array<String>
+    {
+      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
+    },
+  };
+
   @:noUsing
   public static function readProtoData(fileName:String):ProtoData
   {
@@ -55,12 +205,12 @@ class Importer
       Context.defineType(
         self.getFakeEnumDefinition(
           fullName,
-          NameConverter.DEFAULT_ENUM_NAME_CONVERTER));
+          DEFAULT_ENUM_NAME_CONVERTER));
       Context.defineType(
         self.getFakeEnumClassDefinition(
           fullName,
-          NameConverter.DEFAULT_ENUM_CLASS_NAME_CONVERTER,
-          NameConverter.DEFAULT_ENUM_NAME_CONVERTER));
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
+          DEFAULT_ENUM_NAME_CONVERTER));
     }
   }
 
@@ -75,21 +225,87 @@ class Importer
     {
       var td = self.getReadonlyMessageDefinition(
           fullName,
-          NameConverter.DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
-          NameConverter.DEFAULT_ENUM_NAME_CONVERTER);
+          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
+          DEFAULT_ENUM_NAME_CONVERTER);
       lazyTypes.set(td.pack.concat([ td.name ]).join("."), td);
     }
   }
 
-  public static function defineAllExtensionSet(self:ProtoData):Void
+  public static function defineAllMessageSetters(self:ProtoData):Void
   {
     for (fullName in self.messages.keys())
     {
-      Context.defineType(
-        self.getExtensionSetDefinition(
+      var typeDefinition =
+        self.getMessageSetterDefinition(
           fullName,
-          NameConverter.DEFAULT_EXTENSION_SET_NAME_CONVERTER));
+          DEFAULT_MESSAGE_SETTER_NAME_CONVERTER,
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
+          DEFAULT_WRITER_NAME_CONVERTER);
+      if (typeDefinition != null)
+      {
+        Context.defineType(typeDefinition);
+      }
     }
+  }
+
+  public static function defineAllPackageSetters(self:ProtoData):Void
+  {
+    for (fullName in self.packages.keys())
+    {
+      var typeDefinition =
+        self.getPackageSetterDefinition(
+          fullName,
+          DEFAULT_PACKAGE_SETTER_NAME_CONVERTER,
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
+          DEFAULT_WRITER_NAME_CONVERTER);
+      if (typeDefinition != null)
+      {
+        Context.defineType(typeDefinition);
+      }
+    }
+  }
+
+  public static function defineAllMessageGetters(self:ProtoData):Void
+  {
+    for (fullName in self.messages.keys())
+    {
+      var typeDefinition =
+        self.getMessageGetterDefinition(
+          fullName,
+          DEFAULT_MESSAGE_GETTER_NAME_CONVERTER,
+          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
+          DEFAULT_MERGER_NAME_CONVERTER);
+      if (typeDefinition != null)
+      {
+        Context.defineType(typeDefinition);
+      }
+    }
+  }
+
+  public static function defineAllPackageGetters(self:ProtoData):Void
+  {
+    for (fullName in self.packages.keys())
+    {
+      var typeDefinition =
+        self.getPackageGetterDefinition(
+          fullName,
+          DEFAULT_PACKAGE_GETTER_NAME_CONVERTER,
+          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
+          DEFAULT_MERGER_NAME_CONVERTER);
+      if (typeDefinition != null)
+      {
+        Context.defineType(typeDefinition);
+      }
+    }
+
   }
 
   public static function defineAllBuilders(self:ProtoData):Void
@@ -99,9 +315,8 @@ class Importer
       Context.defineType(
         self.getBuilderDefinition(
           fullName,
-          NameConverter.DEFAULT_BUILDER_NAME_CONVERTER,
-          NameConverter.DEFAULT_EXTENSION_SET_NAME_CONVERTER,
-          NameConverter.DEFAULT_ENUM_NAME_CONVERTER));
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_NAME_CONVERTER));
     }
   }
 
@@ -112,9 +327,9 @@ class Importer
       Context.defineType(
         self.getMergerDefinition(
           fullName,
-          NameConverter.DEFAULT_MERGER_NAME_CONVERTER,
-          NameConverter.DEFAULT_BUILDER_NAME_CONVERTER,
-          NameConverter.DEFAULT_ENUM_CLASS_NAME_CONVERTER));
+          DEFAULT_MERGER_NAME_CONVERTER,
+          DEFAULT_BUILDER_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER));
     }
   }
 
@@ -125,9 +340,9 @@ class Importer
       Context.defineType(
         self.getWriterDefinition(
           fullName,
-          NameConverter.DEFAULT_WRITER_NAME_CONVERTER,
-          NameConverter.DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
-          NameConverter.DEFAULT_ENUM_CLASS_NAME_CONVERTER));
+          DEFAULT_WRITER_NAME_CONVERTER,
+          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
+          DEFAULT_ENUM_CLASS_NAME_CONVERTER));
     }
   }
 
@@ -137,9 +352,12 @@ class Importer
     var protoData = readProtoData(fileName);
     defineAllEnums(protoData);
     defineAllReadonlyMessages(protoData);
-    defineAllExtensionSet(protoData);
     defineAllBuilders(protoData);
     defineAllBinaryWriters(protoData);
     defineAllBinaryMergers(protoData);
+    defineAllMessageGetters(protoData);
+    defineAllPackageGetters(protoData);
+    defineAllMessageSetters(protoData);
+    defineAllPackageSetters(protoData);
   }
 }

@@ -1,4 +1,5 @@
-package com.dongxiguo.protobuf.compiler;
+package com.dongxiguo.protobuf.commandLine;
+
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Printer;
@@ -6,31 +7,23 @@ import haxe.PosInfos;
 import sys.io.File;
 import sys.FileSystem;
 import com.dongxiguo.protobuf.binaryFormat.BinaryFileInput;
+import com.dongxiguo.protobuf.compiler.NameConverter;
+import com.dongxiguo.protobuf.compiler.ProtoData;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet_Builder;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
+
 using com.dongxiguo.protobuf.compiler.BinaryFormat;
+using com.dongxiguo.protobuf.compiler.Extension;
 using com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet_Merger;
 
 /**
   @author 杨博
 **/
-class Bootstrap
+class BootstrapGenerator
 {
   static var BOOTSTRAP_PACKAGE_PREFIX(default, never) = [ "com", "dongxiguo", "protobuf", "compiler", "bootstrap" ];
 
-  static var BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER(default, never):NameConverter.UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return NameConverter.getClassName(protoFullyQualifiedName) + "_ExtensionSet";
-    },
-    getHaxePackage: function(protoPackage:String):Array<String>
-    {
-      return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
-    },
-  };
-
-  static var BOOTSTRAP_MERGER_NAME_CONVERTER(default, never):NameConverter.UtilityNameConverter =
+  static var BOOTSTRAP_MERGER_NAME_CONVERTER(default, never):UtilityNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
     {
@@ -42,7 +35,7 @@ class Bootstrap
     },
   };
 
-  static var BOOTSTRAP_BUILDER_NAME_CONVERTER(default, never):NameConverter.MessageNameConverter =
+  static var BOOTSTRAP_BUILDER_NAME_CONVERTER(default, never):MessageNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
     {
@@ -52,10 +45,13 @@ class Bootstrap
     {
       return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
     },
-    toHaxeFieldName: NameConverter.DEFAULT_BUILDER_NAME_CONVERTER.toHaxeFieldName,
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
   };
 
-  static var BOOTSTRAP_READONLY_MESSAGE_NAME_CONVERTER(default, never):NameConverter.MessageNameConverter =
+  static var BOOTSTRAP_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
     {
@@ -65,10 +61,13 @@ class Bootstrap
     {
       return BOOTSTRAP_PACKAGE_PREFIX.concat(NameConverter.getLowerCamelCasePackage(protoPackage));
     },
-    toHaxeFieldName: NameConverter.DEFAULT_BUILDER_NAME_CONVERTER.toHaxeFieldName,
+    toHaxeFieldName: function(fieldName:String):String
+    {
+      return NameConverter.replaceKeyword(NameConverter.lowerCaseUnderlineToLowerCamelCase(fieldName));
+    },
   };
 
-  static var BOOTSTRAP_ENUM_NAME_CONVERTER(default, never):NameConverter.EnumNameConverter =
+  static var BOOTSTRAP_ENUM_NAME_CONVERTER(default, never):EnumNameConverter =
   {
     toHaxeEnumConstructorName: NameConverter.identity,
     getHaxeEnumName: NameConverter.getClassName,
@@ -78,7 +77,7 @@ class Bootstrap
     },
   };
 
-  static var BOOTSTRAP_ENUM_CLASS_NAME_CONVERTER(default, never):NameConverter.UtilityNameConverter =
+  static var BOOTSTRAP_ENUM_CLASS_NAME_CONVERTER(default, never):UtilityNameConverter =
   {
     getHaxeClassName: function(protoFullyQualifiedName:String):String
     {
@@ -142,7 +141,6 @@ class Bootstrap
 
   static function readProtoData(fileName:String):ProtoData
   {
-    var builder:FileDescriptorSet = { file: [] };
     var haxeInput = File.read(fileName);
     var builder = new FileDescriptorSet_Builder();
     try
@@ -182,15 +180,9 @@ class Bootstrap
     {
       writeHxFile(
         outputDirectory,
-        protoData.getExtensionSetDefinition(
-          fullName,
-          BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER));
-      writeHxFile(
-        outputDirectory,
         protoData.getBuilderDefinition(
           fullName,
           BOOTSTRAP_BUILDER_NAME_CONVERTER,
-          BOOTSTRAP_EXTENSION_SET_NAME_CONVERTER,
           BOOTSTRAP_ENUM_NAME_CONVERTER));
       writeHxFile(
         outputDirectory,

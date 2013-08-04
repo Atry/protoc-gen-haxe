@@ -1,0 +1,13 @@
+{
+  "name": "protoc-gen-haxe",
+  "license": "BSD",
+  "tags": ["cross","utility","serialization","protobuf","serializer","marshaller","js","javascript","nme","cpp","flash","neko","php"],
+  "description": "Protocol Buffers for Haxe",
+  "contributors": ["Atry"],
+  "releasenote": "Initial release.",
+  "version": "1.0.0",
+  "url": "https://github.com/Atry/protoc-gen-haxe",
+  "dependencies": {
+
+  }
+}

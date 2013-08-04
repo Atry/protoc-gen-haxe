@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FieldOptions_Merger {
-	public static var FIELD_MAP(default,never):com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder>={
+	static var FIELD_MAP(default,never):com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder>={
 		var fieldMap=new com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder>();
 		{
 			fieldMap.set(8,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.ctype=com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType_EnumClass.valueOf(com.dongxiguo.protobuf.binaryFormat.ReadUtils.readInt32(input)));
@@ -11,7 +11,7 @@ class FieldOptions_Merger {
 			fieldMap.set(80,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.weak=com.dongxiguo.protobuf.binaryFormat.ReadUtils.readBool(input));
 			fieldMap.set(7994,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.uninterpretedOption.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder();
-				com.dongxiguo.protobuf.binaryFormat.ReadUtils.mergeDelimitedFrom(com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Merger.FIELD_MAP,fieldBuilder,input);
+				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
 		};

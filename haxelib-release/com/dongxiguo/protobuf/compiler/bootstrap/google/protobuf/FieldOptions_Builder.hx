@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FieldOptions_Builder {
-	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
 	static var __default_ctype(null,never):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType>=com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType.STRING;
 	inline function set_ctype(value) {
 		return ctype=value;
@@ -46,8 +46,5 @@ class FieldOptions_Builder {
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
 	public function new() {
 		this.uninterpretedOption=[];
-	}
-	public inline function sortUnknownFields() {
-		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

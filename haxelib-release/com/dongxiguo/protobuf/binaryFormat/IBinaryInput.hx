@@ -4,8 +4,8 @@ import haxe.io.BytesData;
 
 interface IBinaryInput
 {
-  function readUTFBytes(length:Int):TYPE_STRING;
-  function readUnsignedByte():TYPE_INT32;
+  function readUTFBytes(length:TYPE_UINT32):TYPE_STRING;
+  function readUnsignedByte():TYPE_UINT32;
   function readDouble():TYPE_DOUBLE;
   function readFloat():TYPE_FLOAT;
   function readInt():TYPE_INT32;

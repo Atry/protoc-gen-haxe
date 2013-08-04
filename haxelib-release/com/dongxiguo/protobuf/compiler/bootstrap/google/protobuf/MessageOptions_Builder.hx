@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class MessageOptions_Builder {
-	@:optional public var unknownFields(default,default):Array<com.dongxiguo.protobuf.UnknownField<Dynamic>>;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
 	static var __default_messageSetWireFormat(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
 	inline function set_messageSetWireFormat(value) {
 		return messageSetWireFormat=value;
@@ -24,8 +24,5 @@ class MessageOptions_Builder {
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
 	public function new() {
 		this.uninterpretedOption=[];
-	}
-	public inline function sortUnknownFields() {
-		return com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.MessageOptions_ExtensionSet.sortUnknownFields(this.unknownFields);
 	}
 }

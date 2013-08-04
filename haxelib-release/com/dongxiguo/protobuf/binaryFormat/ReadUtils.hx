@@ -1,16 +1,19 @@
 package com.dongxiguo.protobuf.binaryFormat;
 
+import com.dongxiguo.protobuf.Error;
+import com.dongxiguo.protobuf.UnknownField;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Label;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
-import haxe.io.Bytes;
-import haxe.io.BytesData;
-using Type;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
-import com.dongxiguo.protobuf.Error;
+import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
+import com.dongxiguo.protobuf.WireType;
+import haxe.io.Bytes;
+import haxe.io.BytesData;
+
+using Type;
 
 #if haxe3
 import haxe.ds.IntMap;
@@ -27,16 +30,24 @@ private typedef StringMap<Value> = Hash<Value>;
 @:final class ReadUtils
 {
 
-  public static function mergeDelimitedFrom<Builder>(fieldMap:FieldMap<Builder>, builder:Builder, input:IBinaryInput):Void
+  public static function mergerUnknownField(unknownFields:UnknownFieldMap, tag:Int, value:UnknownField)
   {
-    var length = readUint32(input);
-    var bytesAfterMessage = input.numBytesAvailable - length;
-    input.numBytesAvailable = length;
-    mergeFrom(fieldMap, builder, input);
-    input.numBytesAvailable = bytesAfterMessage;
+    var originalValue = unknownFields.get(tag);
+    if (originalValue == null)
+    {
+      unknownFields.set(tag, value);
+    }
+    else if (Std.is(originalValue, Array))
+    {
+      cast (originalValue, Array<Dynamic>).push(value);
+    }
+    else
+    {
+      unknownFields.set(tag, [ originalValue, value ]);
+    }
   }
 
-  public static function mergeFrom<Builder>(fieldMap:FieldMap<Builder>, builder:Builder, input:IBinaryInput):Void
+  public static function mergeFrom<Builder:{ var unknownFields:UnknownFieldMap; }>(fieldMap:FieldMap<Builder>, builder:Builder, input:IBinaryInput):Void
   {
     while (input.numBytesAvailable > 0)
     {
@@ -44,14 +55,51 @@ private typedef StringMap<Value> = Hash<Value>;
       var fieldMerger = fieldMap.get(tag);
       if (fieldMerger == null)
       {
-        trace("TODO: Unknown tag " + tag + " for " + builder);
-        //ReadUtils.mergeUnknown(builder, input, tag);
+        var unknownFields = builder.unknownFields;
+        if (unknownFields == null)
+        {
+          unknownFields = new UnknownFieldMap();
+          builder.unknownFields = unknownFields;
+        }
+        switch (tag | 7)
+        {
+          case WireType.VARINT:
+          {
+            mergerUnknownField(unknownFields, tag, readInt64(input));
+          }
+          case WireType.FIXED_64_BIT:
+          {
+            var bytes = haxe.io.Bytes.alloc(8);
+            input.readBytes(bytes.getData(), 0, 8);
+            mergerUnknownField(unknownFields, tag, bytes);
+          }
+          case WireType.LENGTH_DELIMITED:
+          {
+            mergerUnknownField(unknownFields, tag, readBytes(input));
+          }
+          case WireType.FIXED_32_BIT:
+          {
+            var bytes = haxe.io.Bytes.alloc(4);
+            input.readBytes(bytes.getData(), 0, 4);
+            mergerUnknownField(unknownFields, tag, bytes);
+          }
+          default: throw Error.InvalidWireType;
+        }
       }
       else
       {
         fieldMerger(builder, input);
       }
     }
+  }
+
+  public static function mergeDelimitedFrom<Builder:{ var unknownFields:UnknownFieldMap; }>(fieldMap:FieldMap<Builder>, builder:Builder, input:IBinaryInput):Void
+  {
+    var length = readUint32(input);
+    var bytesAfterMessage = input.numBytesAvailable - length;
+    input.numBytesAvailable = length;
+    mergeFrom(fieldMap, builder, input);
+    input.numBytesAvailable = bytesAfterMessage;
   }
 
   public static function readString(input:IBinaryInput):Types.TYPE_STRING
@@ -93,9 +141,9 @@ private typedef StringMap<Value> = Hash<Value>;
     var low = input.readInt();
     var high = input.readInt();
     #if haxe3
-    return Types.TYPE_FIXED64.make(low, high);
+    return Types.TYPE_FIXED64.make(high, low);
     #else
-    return Types.TYPE_FIXED64.make(haxe.Int32.ofInt(low), haxe.Int32.ofInt(high));
+    return Types.TYPE_FIXED64.make(haxe.Int32.ofInt(high), haxe.Int32.ofInt(low));
     #end
   }
 
@@ -143,39 +191,39 @@ private typedef StringMap<Value> = Hash<Value>;
     return Types.TYPE_FIXED64.make(Int32.ofInt(transformedLow), Int32.ofInt(transformedHigh));
     #end
   }
-
-  static function readRawVarint32<I:IBinaryInput>(firstByte:Int, input:I):Types.TYPE_UINT32
-  {
-    if ((firstByte & 0x80) == 0) {
-      return firstByte;
-    }
-
-    var result = firstByte & 0x7f;
-    var offset = 7;
-    while (offset < 32) {
-      var b = input.readUnsignedByte();
-      if (b == 255) {
-        throw Error.TruncatedMessage;
-      }
-      result |= (b & 0x7f) << offset;
-      if ((b & 0x80) == 0) {
-        return result;
-      }
-      offset += 7;
-    }
+//
+  //static function readRawVarint32<I:IBinaryInput>(firstByte:Int, input:I):Types.TYPE_UINT32
+  //{
+    //if ((firstByte & 0x80) == 0) {
+      //return firstByte;
+    //}
+//
+    //var result = firstByte & 0x7f;
+    //var offset = 7;
+    //while (offset < 32) {
+      //var b = input.readUnsignedByte();
+      //if (b == 255) {
+        //throw Error.TruncatedMessage;
+      //}
+      //result |= (b & 0x7f) << offset;
+      //if ((b & 0x80) == 0) {
+        //return result;
+      //}
+      //offset += 7;
+    //}
     // Keep reading up to 64 bits.
-    while (offset < 64) {
-      var b = input.readUnsignedByte();
-      if (b == 255) {
-        throw Error.TruncatedMessage;
-      }
-      if ((b & 0x80) == 0) {
-        return result;
-      }
-      offset += 7;
-    }
-    throw Error.MalformedVarint;
-  }
+    //while (offset < 64) {
+      //var b = input.readUnsignedByte();
+      //if (b == 255) {
+        //throw Error.TruncatedMessage;
+      //}
+      //if ((b & 0x80) == 0) {
+        //return result;
+      //}
+      //offset += 7;
+    //}
+    //throw Error.MalformedVarint;
+  //}
 
   public static function readUint32(input:IBinaryInput):Types.TYPE_UINT32
   {

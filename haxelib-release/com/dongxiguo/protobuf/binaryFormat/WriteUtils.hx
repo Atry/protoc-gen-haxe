@@ -1,4 +1,7 @@
 package com.dongxiguo.protobuf.binaryFormat;
+import com.dongxiguo.protobuf.UnknownField;
+import com.dongxiguo.protobuf.WireType;
+import com.dongxiguo.protobuf.Error;
 import haxe.Int64;
 
 /**
@@ -7,7 +10,28 @@ import haxe.Int64;
 @:final class WriteUtils
 {
 
-  public static function writeUint32(buffer:WritingBuffer, value:Types.TYPE_UINT32):Void
+  public static function writeUnknownField(
+    buffer:WritingBuffer,
+    unknownFields:ReadonlyUnknownFieldMap):Void
+  {
+    for (tag in unknownFields.keys())
+    {
+      var unknownField = unknownFields.get(tag);
+      writeUint32(buffer, tag);
+      switch (tag | 7)
+      {
+        case WireType.VARINT: writeUint64(buffer, cast unknownField);
+        case WireType.FIXED_64_BIT: buffer.writeBytes(cast unknownField, 0, 8);
+        case WireType.LENGTH_DELIMITED: writeBytes(buffer, cast unknownField);
+        case WireType.FIXED_32_BIT: buffer.writeBytes(cast unknownField, 0, 4);
+        default: throw Error.InvalidWireType;
+      }
+    }
+  }
+
+  public static function writeUint32(
+    buffer:WritingBuffer,
+    value:Types.TYPE_UINT32):Void
   {
     while (true)
     {
