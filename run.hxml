@@ -1,0 +1,4 @@
+-cp haxelib-release
+-lib haxelib-run
+-neko haxelib-release/run.n
+-main com.dongxiguo.protobuf.commandLine.Run
