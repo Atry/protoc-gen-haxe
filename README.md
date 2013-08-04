@@ -111,6 +111,13 @@ Then add `--gen-hx-classes` to your `haxe` command and look at the `hxclasses/` 
  * Run-time type information of service, enums, messages, options, custom options...
  * Compile-time type information of service service, enums, messages, options, custom options...
 
+### Missing features
+
+ * Text format
+ * Group (A deprecated feature since Protocol Buffers 2)
+
+I would like to see somebody's contribution for these missing features.
+
 ## Requirement
 
  * Haxe 3.x
