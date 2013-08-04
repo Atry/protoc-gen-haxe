@@ -8,7 +8,7 @@ protoc-gen-haxe
 I am also the author of [protoc-gen-as3](https://code.google.com/p/protoc-gen-as3/),
 which is the best Protocol Buffers implementation in ActionScript 3.
 I rewritten these code because I want try the Haxe way to generate code.
-This is main different between `protoc-gen-as` (or any other Protocol Buffers implementation) and `protoc-gen-haxe`.
+This table lists main different between `protoc-gen-as` (or any other Protocol Buffers implementation) and `protoc-gen-haxe`:
 
 | | protoc-gen-as3 | protoc-gen-haxe |
 | ------------- | ------------- | ----- |
