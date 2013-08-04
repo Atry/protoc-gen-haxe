@@ -5,7 +5,7 @@ protoc-gen-haxe
 
 ## Motive
 
-I am the also author of [protoc-gen-as3](https://code.google.com/p/protoc-gen-as3/),
+I am also the author of [protoc-gen-as3](https://code.google.com/p/protoc-gen-as3/),
 which is the best Protocol Buffers implementation in ActionScript 3.
 But `protoc-gen-haxe` is not a port from `protoc-gen-as3`.
 `protoc-gen-haxe` is very different from `protoc-gen-as3`:
