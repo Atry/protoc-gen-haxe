@@ -4,8 +4,8 @@
   "tags": ["cross","utility","serialization","protobuf","serializer","marshaller","js","javascript","nme","cpp","flash","neko","php"],
   "description": "Protocol Buffers for Haxe",
   "contributors": ["Atry"],
-  "releasenote": "Minor fixes.",
-  "version": "1.0.1",
+  "releasenote": "Added missing license declearation.",
+  "version": "1.0.2",
   "url": "https://github.com/Atry/protoc-gen-haxe",
   "dependencies": {
 
