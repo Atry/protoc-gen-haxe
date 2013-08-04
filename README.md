@@ -1,7 +1,7 @@
 protoc-gen-haxe
 ===============
 
-'''protoc-gen-haxe''' is a Protocol Buffers implementation in [Haxe](http://www.haxe.org/).
+**protoc-gen-haxe** is a Protocol Buffers implementation in [Haxe](http://www.haxe.org/).
 
 ## Motive
 
