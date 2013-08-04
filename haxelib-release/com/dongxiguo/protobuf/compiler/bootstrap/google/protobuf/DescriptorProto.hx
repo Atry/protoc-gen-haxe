@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 typedef DescriptorProto = {
-	@:optional public var unknownFields(default,null):com.dongxiguo.protobuf.UnknownField.ReadonlyUnknownFieldMap;
+	@:optional public var unknownFields(default,null):com.dongxiguo.protobuf.unknownField.ReadonlyUnknownFieldMap;
 	@:optional public var name(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	public var field(default,null):Iterable<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto>;
 	public var extension(default,null):Iterable<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto>;

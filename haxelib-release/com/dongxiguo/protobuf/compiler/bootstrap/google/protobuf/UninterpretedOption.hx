@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 typedef UninterpretedOption = {
-	@:optional public var unknownFields(default,null):com.dongxiguo.protobuf.UnknownField.ReadonlyUnknownFieldMap;
+	@:optional public var unknownFields(default,null):com.dongxiguo.protobuf.unknownField.ReadonlyUnknownFieldMap;
 	public var name(default,null):Iterable<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.uninterpretedOption.NamePart>;
 	@:optional public var identifierValue(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var positiveIntValue(default,null):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_UINT64>;

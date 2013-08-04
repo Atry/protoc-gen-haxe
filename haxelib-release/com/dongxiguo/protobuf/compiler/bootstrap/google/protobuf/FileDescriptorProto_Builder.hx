@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FileDescriptorProto_Builder {
-	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
 	@:optional public var name(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var package_(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	public var dependency(default,default):Array<com.dongxiguo.protobuf.Types.TYPE_STRING>;

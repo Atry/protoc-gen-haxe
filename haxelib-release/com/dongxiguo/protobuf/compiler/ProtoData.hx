@@ -613,21 +613,6 @@ private typedef StringMap<Value> = Hash<Value>;
     return getEnumDefinition(fullName, enumNameConverter, FakeEnumBehavior.NEVER);
   }
 
-  static var UNKNOWN_FIELD_COMPLEX_TYPE(default, never) = TPath(
-    {
-      pack: [ "com", "dongxiguo", "protobuf" ],
-      name: "UnknownField",
-      params:
-      [
-        TPType(TPath(
-          {
-            pack: [],
-            name: "Dynamic",
-            params: [],
-          })),
-      ],
-    });
-
   function getMessageDefinition(
     fullName:String,
     messageNameConverter:NameConverter.MessageNameConverter,
@@ -690,9 +675,8 @@ private typedef StringMap<Value> = Hash<Value>;
           readonly ? "null" : "default",
            TPath(
               {
-                pack: [ "com", "dongxiguo", "protobuf" ],
-                name: "UnknownField",
-                sub: readonly ? "ReadonlyUnknownFieldMap" : "UnknownFieldMap",
+                pack: [ "com", "dongxiguo", "protobuf", "unknownField" ],
+                name: readonly ? "ReadonlyUnknownFieldMap" : "UnknownFieldMap",
                 params: [],
               })),
       }];

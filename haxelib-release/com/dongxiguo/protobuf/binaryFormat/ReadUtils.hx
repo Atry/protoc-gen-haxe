@@ -1,7 +1,8 @@
 package com.dongxiguo.protobuf.binaryFormat;
 
 import com.dongxiguo.protobuf.Error;
-import com.dongxiguo.protobuf.UnknownField;
+import com.dongxiguo.protobuf.unknownField.UnknownField;
+import com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto;

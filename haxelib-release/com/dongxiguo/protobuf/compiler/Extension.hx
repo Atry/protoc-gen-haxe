@@ -47,54 +47,6 @@ class Extension
     #end
   }
 
-  static var UNKNOWN_FIELD_COMPLEX_TYPE(default, never) = TPath(
-    {
-      pack: [ "com", "dongxiguo", "protobuf" ],
-      name: "UnknownField",
-      params:
-      [
-        TPType(TPath(
-          {
-            pack: [],
-            name: "Dynamic",
-            params: [],
-          })),
-      ],
-    });
-
-  static var ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE = ComplexType.TPath(
-  {
-    pack: [],
-    name: "Array",
-    params: [ TPType(UNKNOWN_FIELD_COMPLEX_TYPE) ],
-  });
-
-  static var SORTED_UNKNOWN_FIELDS_READER(default, never) = TypeDefKind.TDAbstract(
-    ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
-    null,
-    [ ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE ]);
-
-  static var EXTENSION_READER_NEW_FIELD(default, never):Field =
-  {
-    name: "new",
-    pos: makeMacroPosition(),
-    access: [ AInline ],
-    kind: FFun(
-      {
-        args:
-        [
-          {
-            name: "sortedArray",
-            opt: false,
-            type: ARRAY_UNKNOWN_FIELD_COMPLEX_TYPE,
-          }
-        ],
-        ret: null,
-        params: [],
-        expr: macro { this = sortedArray; },
-      }),
-  };
-
   static function getSetterDefinition(
     self:ProtoData,
     fullName:String,
@@ -137,7 +89,7 @@ class Extension
           var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
           var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
           var nestedEnumClassExpr = packageDotClass(enumPackageExpr, enumClassName);
-          return macro com.dongxiguo.protobuf.UnknownField.fromOptional(com.dongxiguo.protobuf.UnknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber(value)));
+          return macro com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional(com.dongxiguo.protobuf.unknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber(value)));
         }
         default:
         {
@@ -175,7 +127,7 @@ class Extension
               throw ProtobufError.MalformedEnumConstructor;
             }
           }
-          return macro com.dongxiguo.protobuf.UnknownField.fromOptional(com.dongxiguo.protobuf.UnknownField.$abstractTypeName.$fromFunctionName($valueExpr));
+          return macro com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional(com.dongxiguo.protobuf.unknownField.$abstractTypeName.$fromFunctionName($valueExpr));
         }
       }
     }
@@ -227,7 +179,7 @@ class Extension
                   var unknownFields = self.unknownFields;
                   if (unknownFields == null)
                   {
-                    unknownFields = new com.dongxiguo.protobuf.UnknownField.UnknownFieldMap();
+                    unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
                     self.unknownFields = unknownFields;
                   }
                   unknownFields.set($nonPackedTagExpr, $unknownFieldValueExpr);
@@ -291,7 +243,7 @@ class Extension
                       var unknownFields = self.unknownFields;
                       if (unknownFields == null)
                       {
-                        unknownFields = new com.dongxiguo.protobuf.UnknownField.UnknownFieldMap();
+                        unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
                         self.unknownFields = unknownFields;
                       }
                       unknownFields.set($packedTagExpr, bytes);
@@ -320,7 +272,7 @@ class Extension
                     var unknownFields = self.unknownFields;
                     if (unknownFields == null)
                     {
-                      unknownFields = new com.dongxiguo.protobuf.UnknownField.UnknownFieldMap();
+                      unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
                       self.unknownFields = unknownFields;
                     }
                     inline function dummy<T>(i:Iterable<T>) { }

@@ -1,5 +1,5 @@
 package com.dongxiguo.protobuf.binaryFormat;
-import com.dongxiguo.protobuf.UnknownField;
+import com.dongxiguo.protobuf.unknownField.ReadonlyUnknownFieldMap;
 import com.dongxiguo.protobuf.WireType;
 import com.dongxiguo.protobuf.Error;
 import haxe.Int64;

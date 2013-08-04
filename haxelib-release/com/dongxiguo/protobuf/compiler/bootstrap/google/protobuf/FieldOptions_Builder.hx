@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FieldOptions_Builder {
-	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
 	static var __default_ctype(null,never):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType>=com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldOptions.CType.STRING;
 	inline function set_ctype(value) {
 		return ctype=value;

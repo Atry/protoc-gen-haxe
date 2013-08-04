@@ -1,6 +1,6 @@
 package com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf;
 class FileOptions_Builder {
-	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.UnknownField.UnknownFieldMap;
+	@:optional public var unknownFields(default,default):com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
 	@:optional public var javaPackage(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var javaOuterClassname(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	static var __default_javaMultipleFiles(null,never):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>=false;
