@@ -14,17 +14,20 @@ import haxe.Int64;
     buffer:WritingBuffer,
     unknownFields:ReadonlyUnknownFieldMap):Void
   {
-    for (tag in unknownFields.keys())
+    if (unknownFields != null)
     {
-      var unknownField = unknownFields.get(tag);
-      writeUint32(buffer, tag);
-      switch (tag | 7)
+      for (tag in unknownFields.keys())
       {
-        case WireType.VARINT: writeUint64(buffer, cast unknownField);
-        case WireType.FIXED_64_BIT: buffer.writeBytes(cast unknownField, 0, 8);
-        case WireType.LENGTH_DELIMITED: writeBytes(buffer, cast unknownField);
-        case WireType.FIXED_32_BIT: buffer.writeBytes(cast unknownField, 0, 4);
-        default: throw Error.InvalidWireType;
+        var unknownField = unknownFields.get(tag);
+        writeUint32(buffer, tag);
+        switch (tag | 7)
+        {
+          case WireType.VARINT: writeUint64(buffer, cast unknownField);
+          case WireType.FIXED_64_BIT: buffer.writeBytes(cast unknownField, 0, 8);
+          case WireType.LENGTH_DELIMITED: writeBytes(buffer, cast unknownField);
+          case WireType.FIXED_32_BIT: buffer.writeBytes(cast unknownField, 0, 4);
+          default: throw Error.InvalidWireType;
+        }
       }
     }
   }
