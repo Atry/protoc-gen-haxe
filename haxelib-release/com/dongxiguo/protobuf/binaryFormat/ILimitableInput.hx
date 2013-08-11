@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,16 +29,17 @@
 
 package com.dongxiguo.protobuf.binaryFormat;
 import com.dongxiguo.protobuf.Types;
-import haxe.io.BytesData;
+import haxe.io.Bytes;
 
-interface IBinaryInput
+/** Like [haxe.io.Input], but can set limit. */
+interface ILimitableInput
 {
-  function readUTFBytes(length:TYPE_UINT32):TYPE_STRING;
-  function readUnsignedByte():TYPE_UINT32;
-  function readDouble():TYPE_DOUBLE;
-  function readFloat():TYPE_FLOAT;
-  function readInt():TYPE_INT32;
-  function readBytes(bytesData:BytesData, offset:TYPE_UINT32 = 0, length:TYPE_UINT32 = 0):Void;
+  function checkedReadString(length:TYPE_UINT32):TYPE_STRING;
+  function checkedReadByte():TYPE_UINT32;
+  function checkedReadDouble():TYPE_DOUBLE;
+  function checkedReadFloat():TYPE_FLOAT;
+  function checkedReadInt32():TYPE_INT32;
+  function checkedReadByes(destination:TYPE_BYTES, offset:Int, length:Int):Int;
 
-  var numBytesAvailable(get_numBytesAvailable, set_numBytesAvailable):TYPE_UINT32;
+  var limit(get_limit, set_limit):TYPE_UINT32;
 }

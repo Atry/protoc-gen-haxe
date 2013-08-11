@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,43 +28,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 package com.dongxiguo.protobuf.binaryFormat;
-import com.dongxiguo.protobuf.Error;
-import flash.utils.ByteArray;
-import flash.utils.Endian;
-import com.dongxiguo.protobuf.Types;
+
+#if sys
+import haxe.io.Bytes;
 import haxe.io.BytesData;
+import sys.io.File;
+import sys.io.FileInput;
+import sys.FileSystem;
+import com.dongxiguo.protobuf.Types;
 
 /**
-  @author 杨博
-**/
-class ByteArrayInput extends ByteArray implements IBinaryInput
+ * @author 杨博
+ */
+class LimitableFileInput implements ILimitableInput
 {
+  var maxPosition:TYPE_UINT32;
+  var underlyingInput:FileInput;
 
-  public function new()
+  public function new(underlyingInput:FileInput, limit:TYPE_UINT32)
   {
-    super();
-    this.endian = Endian.LITTLE_ENDIAN;
+    underlyingInput.bigEndian = false;
+    this.underlyingInput = underlyingInput;
+    this.limit = limit;
   }
 
-  var numBytesAfterSlice:TYPE_UINT32;
-
-  inline function get_numBytesAvailable():TYPE_UINT32
+  public function checkedReadString(length:TYPE_UINT32):String
   {
-    return this.bytesAvailable - this.numBytesAfterSlice;
-  }
-
-  inline function set_numBytesAvailable(value:TYPE_UINT32):TYPE_UINT32
-  {
-    return this.numBytesAfterSlice = this.bytesAvailable - value;
-  }
-
-  public var numBytesAvailable(get_numBytesAvailable, set_numBytesAvailable):TYPE_UINT32;
-
-  override public function readUTFBytes(length:TYPE_UINT32):TYPE_STRING
-  {
-    if (numBytesAvailable >= length)
+    if (limit >= length)
     {
-      return super.readUTFBytes(length);
+      return underlyingInput.readString(length);
     }
     else
     {
@@ -72,11 +64,11 @@ class ByteArrayInput extends ByteArray implements IBinaryInput
     }
   }
 
-  override public function readUnsignedByte():TYPE_UINT32
+  public function checkedReadByte():TYPE_UINT32
   {
-    if (numBytesAvailable > 0)
+    if (underlyingInput.tell() <= maxPosition)
     {
-      return super.readUnsignedByte();
+      return underlyingInput.readByte();
     }
     else
     {
@@ -84,11 +76,23 @@ class ByteArrayInput extends ByteArray implements IBinaryInput
     }
   }
 
-  override public function readDouble():TYPE_DOUBLE
+  public function checkedReadByes(bytes:Bytes, offset, length):Int
   {
-    if (numBytesAvailable >= 8)
+    if (limit >= length)
     {
-      return super.readDouble();
+      return underlyingInput.readBytes(bytes, 0, length);
+    }
+    else
+    {
+      return throw Error.OutOfBounds;
+    }
+  }
+
+  public function checkedReadDouble():TYPE_DOUBLE
+  {
+    if (limit >= 8)
+    {
+      return underlyingInput.readDouble();
     }
     else
     {
@@ -96,11 +100,11 @@ class ByteArrayInput extends ByteArray implements IBinaryInput
     }
   }
 
-  override public function readFloat():TYPE_FLOAT
+  public function checkedReadFloat():TYPE_FLOAT
   {
-    if (numBytesAvailable >= 4)
+    if (limit >= 4)
     {
-      return super.readFloat();
+      return underlyingInput.readFloat();
     }
     else
     {
@@ -108,14 +112,14 @@ class ByteArrayInput extends ByteArray implements IBinaryInput
     }
   }
 
-  override public function readInt():TYPE_INT32
+  public function checkedReadInt32():TYPE_INT32
   {
-    if (numBytesAvailable >= 4)
+    if (limit >= 4)
     {
       #if haxe3
-      return super.readInt();
+      return underlyingInput.readInt32();
       #else
-      return haxe.Int32.toNativeInt(super.readInt());
+      return haxe.Int32.toNativeInt(underlyingInput.checkedReadInt32());
       #end
     }
     else
@@ -124,20 +128,18 @@ class ByteArrayInput extends ByteArray implements IBinaryInput
     }
   }
 
-  override public function readBytes(bytesData:BytesData, offset:TYPE_UINT32 = 0, length:TYPE_UINT32 = 0):Void
+  public inline function get_limit():TYPE_UINT32
   {
-    if (length == 0)
-    {
-      length = numBytesAvailable;
-    }
-    if (numBytesAvailable >= length)
-    {
-      super.readBytes(bytesData, 0, length);
-    }
-    else
-    {
-      return throw Error.OutOfBounds;
-    }
+    return maxPosition - underlyingInput.tell();
   }
 
+  public inline function set_limit(value:TYPE_UINT32):TYPE_UINT32
+  {
+    return maxPosition = underlyingInput.tell() + value;
+  }
+
+  public var limit(get_limit, set_limit):TYPE_UINT32;
+
 }
+
+#end

@@ -29,13 +29,15 @@
 
 package com.dongxiguo.protobuf.commandLine;
 
+#if neko
+
 import haxe.macro.Expr;
 import haxe.macro.Context;
 import haxe.macro.Printer;
 import haxe.PosInfos;
 import sys.io.File;
 import sys.FileSystem;
-import com.dongxiguo.protobuf.binaryFormat.BinaryFileInput;
+import com.dongxiguo.protobuf.binaryFormat.LimitableFileInput;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.ProtoData;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet_Builder;
@@ -174,7 +176,7 @@ class BootstrapGenerator
     var builder = new FileDescriptorSet_Builder();
     try
     {
-      var input = new BinaryFileInput(haxeInput, FileSystem.stat(fileName).size);
+      var input = new LimitableFileInput(haxeInput, FileSystem.stat(fileName).size);
       builder.mergeFrom(input);
     }
     catch (e:Dynamic)
@@ -230,3 +232,4 @@ class BootstrapGenerator
   }
 
 }
+#end

@@ -28,7 +28,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 package com.dongxiguo.protobuf.commandLine;
-import com.dongxiguo.protobuf.binaryFormat.BinaryFileInput;
+
+#if sys
+
+import com.dongxiguo.protobuf.binaryFormat.LimitableFileInput;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.ProtoData;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
@@ -55,7 +58,7 @@ using com.dongxiguo.protobuf.compiler.Extension;
 /**
   @author 杨博
 **/
-class Importer
+@:require(neko) class Importer
 {
 
   public static var DEFAULT_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
@@ -215,18 +218,27 @@ class Importer
     var builder = new FileDescriptorSet_Builder();
     try
     {
-      var input = new BinaryFileInput(haxeInput, FileSystem.stat(fileName).size);
+      var input = new LimitableFileInput(haxeInput, FileSystem.stat(fileName).size);
       builder.mergeFrom(input);
     }
     catch (e:Dynamic)
     {
       haxeInput.close();
+      #if neko
       neko.Lib.rethrow(e);
+      #elseif cpp
+      cpp.Lib.rethrow(e);
+      #elseif php
+      php.Lib.rethrow(e);
+      #else
+      throw e;
+      #end
     }
     haxeInput.close();
     return new ProtoData(builder);
   }
 
+  #if macro
   public static function defineAllEnums(self:ProtoData):Void
   {
     for (fullName in self.enums.keys())
@@ -389,4 +401,6 @@ class Importer
     defineAllMessageSetters(protoData);
     defineAllPackageSetters(protoData);
   }
+  #end
 }
+#end

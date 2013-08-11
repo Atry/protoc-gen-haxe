@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -337,6 +337,19 @@ class Extension
       {
         for (field in file.extension)
         {
+          if (field.type == TYPE_GROUP)
+          {
+            #if neko
+            Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+            {
+              pos: makeMacroPosition(),
+              expr: EBlock([]),
+            }
+            #else
+            trace("TYPE_GROUP is unsupported!");
+            #end
+            continue;
+          }
           getSetterDefinition(
             self,
             fullName,
@@ -382,6 +395,19 @@ class Extension
     [
       for (field in messageProto.extension)
       {
+        if (field.type == TYPE_GROUP)
+        {
+          #if neko
+          Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+          {
+            pos: makeMacroPosition(),
+            expr: EBlock([]),
+          }
+          #else
+          trace("TYPE_GROUP is unsupported!");
+          #end
+          continue;
+        }
         getSetterDefinition(
           self,
           fullName,
@@ -474,7 +500,7 @@ class Extension
                 {
                   var bytesValue:haxe.io.Bytes = unknownField.value;
                   var underlyingInput = new haxe.io.BytesInput(bytesValue);
-                  var input = new com.dongxiguo.protobuf.binaryFormat.BinaryBytesInput(underlyingInput, bytesValue.length);
+                  var input = new com.dongxiguo.protobuf.binaryFormat.LimitableBytesInput(underlyingInput, bytesValue.length);
                   var fieldBuilder = $newFieldBuilderExpr;
                   $nestedMergerClassExpr.mergeFrom(fieldBuilder, input);
                   fieldBuilder;
@@ -622,9 +648,8 @@ class Extension
                     for (unknownField in self.unknownFields.get($packedTagExpr).toRepeated())
                     {
                       var bytesValue:haxe.io.Bytes = unknownField.toLengthDelimited();
-                      var underlyingInput = new haxe.io.BytesInput(bytesValue);
-                      var input = new com.dongxiguo.protobuf.binaryFormat.BinaryBytesInput(underlyingInput, bytesValue.length);
-                      while (input.numBytesAvailable > 0)
+                      var input = new com.dongxiguo.protobuf.binaryFormat.LimitableBytesInput(bytesValue);
+                      while (input.limit > 0)
                       {
                         result.push($readExpr);
                       }
@@ -655,6 +680,19 @@ class Extension
       {
         for (field in file.extension)
         {
+          if (field.type == TYPE_GROUP)
+          {
+            #if neko
+            Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+            {
+              pos: makeMacroPosition(),
+              expr: EBlock([]),
+            }
+            #else
+            trace("TYPE_GROUP is unsupported!");
+            #end
+            continue;
+          }
           getGetterDefinition(
             self,
             fullName,
@@ -704,6 +742,19 @@ class Extension
     [
       for (field in messageProto.extension)
       {
+        if (field.type == TYPE_GROUP)
+        {
+          #if neko
+          Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+          {
+            pos: makeMacroPosition(),
+            expr: EBlock([]),
+          }
+          #else
+          trace("TYPE_GROUP is unsupported!");
+          #end
+          continue;
+        }
         getGetterDefinition(
           self,
           fullName,

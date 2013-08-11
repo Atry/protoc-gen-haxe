@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,6 +31,7 @@ package com.dongxiguo.protobuf.binaryFormat;
 import haxe.io.BytesOutput;
 import haxe.io.Output;
 
+/** Internal buffer for serialization. Don't use it in user code. */
 class WritingBuffer extends BytesOutput
 {
   #if (haxe_ver < 3.1)
@@ -59,20 +60,19 @@ class WritingBuffer extends BytesOutput
 	}
   #end
 
-  #if (!flash10)
-    var slices:Array<Int>;
-  #else
+  #if (flash10)
     var slices:flash.Vector<Int>;
+  #else
+    var slices:Array<Int>;
   #end
 
   public function new()
   {
     super();
-    this.bigEndian = false;
-    #if (!flash10)
-      this.slices = [];
-    #else
+    #if (flash10)
       this.slices = new flash.Vector<Int>();
+    #else
+      this.slices = [];
     #end
   }
 
@@ -98,7 +98,7 @@ class WritingBuffer extends BytesOutput
 
   public function toNormal(output:Output):Void
   {
-    #if flash
+    #if flash9
     var bytes = haxe.io.Bytes.ofData(this.b);
     #else
     var bytes = this.getBytes();

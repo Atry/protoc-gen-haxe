@@ -29,6 +29,8 @@
 
 package com.dongxiguo.protobuf.commandLine;
 
+#if neko
+
 import com.dongxiguo.utils.HaxelibRun;
 
 /**
@@ -66,3 +68,5 @@ class Run
   }
 
 }
+
+#end

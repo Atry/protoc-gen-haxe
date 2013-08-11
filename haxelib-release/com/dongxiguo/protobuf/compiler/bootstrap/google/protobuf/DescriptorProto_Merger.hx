@@ -3,33 +3,33 @@ class DescriptorProto_Merger {
 	static var FIELD_MAP(default,never):com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder>={
 		var fieldMap=new com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder>();
 		{
-			fieldMap.set(10,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.name=com.dongxiguo.protobuf.binaryFormat.ReadUtils.readString(input));
-			fieldMap.set(18,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.field.push({
+			fieldMap.set(10,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.name=com.dongxiguo.protobuf.binaryFormat.ReadUtils.readString(input));
+			fieldMap.set(18,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.field.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
-			fieldMap.set(50,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.extension.push({
+			fieldMap.set(50,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.extension.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
-			fieldMap.set(26,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.nestedType.push({
+			fieldMap.set(26,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.nestedType.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
-			fieldMap.set(34,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.enumType.push({
+			fieldMap.set(34,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.enumType.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
-			fieldMap.set(42,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.extensionRange.push({
+			fieldMap.set(42,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.extensionRange.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.descriptorProto.ExtensionRange_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.descriptorProto.ExtensionRange_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;
 			}));
-			fieldMap.set(58,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.options={
+			fieldMap.set(58,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.options={
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.MessageOptions_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.MessageOptions_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;

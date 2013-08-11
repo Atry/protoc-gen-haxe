@@ -3,7 +3,7 @@ class EnumValueOptions_Merger {
 	static var FIELD_MAP(default,never):com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueOptions_Builder>={
 		var fieldMap=new com.dongxiguo.protobuf.binaryFormat.ReadUtils.FieldMap<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueOptions_Builder>();
 		{
-			fieldMap.set(7994,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueOptions_Builder,input:com.dongxiguo.protobuf.binaryFormat.IBinaryInput) builder.uninterpretedOption.push({
+			fieldMap.set(7994,function (builder:com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueOptions_Builder,input:com.dongxiguo.protobuf.binaryFormat.ILimitableInput) builder.uninterpretedOption.push({
 				var fieldBuilder=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder();
 				com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Merger.mergeDelimitedFrom(fieldBuilder,input);
 				fieldBuilder;

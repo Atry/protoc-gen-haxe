@@ -713,6 +713,19 @@ private typedef StringMap<Value> = Hash<Value>;
     var constructorBlock = [];
     for (field in messageProto.field)
     {
+      if (field.type == TYPE_GROUP)
+      {
+        #if neko
+        Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+        {
+          pos: makeMacroPosition(),
+          expr: EBlock([]),
+        }
+        #else
+        trace("TYPE_GROUP is unsupported!");
+        #end
+        continue;
+      }
       var haxeFieldName = messageNameConverter.toHaxeFieldName(field.name);
       switch (field)
       {

@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,7 +29,7 @@
 
 package com.dongxiguo.protobuf.compiler;
 
-import com.dongxiguo.protobuf.binaryFormat.IBinaryInput;
+import com.dongxiguo.protobuf.binaryFormat.ILimitableInput;
 import com.dongxiguo.protobuf.WireType;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.ProtoData;
@@ -39,7 +39,9 @@ import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorS
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Label;
 import haxe.macro.Expr;
+#if neko
 import haxe.macro.Context;
+#end
 import haxe.macro.ExprTools;
 import haxe.PosInfos;
 
@@ -83,7 +85,7 @@ class BinaryFormat
   static var BINARY_INPUT_COMPLEX_TYPE(default, never) = TPath(
     {
       pack: [ "com", "dongxiguo", "protobuf", "binaryFormat" ],
-      name: "IBinaryInput",
+      name: "ILimitableInput",
       params: [],
     });
 
@@ -145,6 +147,19 @@ class BinaryFormat
       var fieldName = builderNameConverter.toHaxeFieldName(field.name);
       var readExpr = switch (field.type)
       {
+        case ProtobufType.TYPE_GROUP:
+        {
+          #if neko
+          Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
+          {
+            pos: makeMacroPosition(),
+            expr: EBlock([]),
+          }
+          #else
+          trace("TYPE_GROUP is unsupported!");
+          #end
+          continue;
+        }
         case ProtobufType.TYPE_MESSAGE:
         {
           var resolvedFieldTypeName = ProtoData.resolve(self.messages, fullName, field.typeName);
@@ -328,13 +343,13 @@ class BinaryFormat
                     expr: macro
                     {
                       var limit = com.dongxiguo.protobuf.binaryFormat.ReadUtils.readUint32(input);
-                      var bytesAfterSlice = input.numBytesAvailable - limit;
-                      input.numBytesAvailable = limit;
-                      while (input.numBytesAvailable > 0)
+                      var bytesAfterSlice = input.limit - limit;
+                      input.limit = limit;
+                      while (input.limit > 0)
                       {
                         builder.$fieldName.push($readExpr);
                       }
-                      input.numBytesAvailable = bytesAfterSlice;
+                      input.limit = bytesAfterSlice;
                     },
                   }),
               }
@@ -496,11 +511,16 @@ class BinaryFormat
                       {
                         case ProtobufType.TYPE_GROUP:
                         {
+                          #if neko
                           Context.warning("TYPE_GROUP is unsupported!", makeMacroPosition());
                           {
                             pos: makeMacroPosition(),
                             expr: EBlock([]),
                           }
+                          #else
+                          trace("TYPE_GROUP is unsupported!");
+                          #end
+                          continue;
                         }
                         case ProtobufType.TYPE_ENUM:
                         {
