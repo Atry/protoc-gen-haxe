@@ -68,7 +68,7 @@ class SampleMain {
   {
     var builder = new SampleMessage_Builder();
     var input = File.read("sample.save");
-    var pbInput = new BinaryFileInput(input, FileSystem.stat("sample.save").size);
+    var pbInput = new LimitableFileInput(input, FileSystem.stat("sample.save").size);
     builder.mergeFrom(pbInput);
     trace('builder.sample = ${builder.sampleField}');
     input.close();
