@@ -103,27 +103,27 @@ import haxe.Int64;
     }
   }
 
-  public static function writeDouble(buffer:WritingBuffer, value:Types.TYPE_DOUBLE):Void
+  public static inline function writeDouble(buffer:WritingBuffer, value:Types.TYPE_DOUBLE):Void
   {
     buffer.writeDouble(value);
   }
 
-  public static function writeFloat(buffer:WritingBuffer, value:Types.TYPE_FLOAT):Void
+  public static inline function writeFloat(buffer:WritingBuffer, value:Types.TYPE_FLOAT):Void
   {
     buffer.writeFloat(value);
   }
 
-  public static function writeInt64(buffer:WritingBuffer, value:Types.TYPE_INT64):Void
+  public static inline function writeInt64(buffer:WritingBuffer, value:Types.TYPE_INT64):Void
   {
     writeVarint64(buffer, Int64.getLow(value), Int64.getHigh(value));
   }
 
-  public static function writeUint64(buffer:WritingBuffer, value:Types.TYPE_UINT64):Void
+  public static inline function writeUint64(buffer:WritingBuffer, value:Types.TYPE_UINT64):Void
   {
     writeVarint64(buffer, Int64.getLow(value), Int64.getHigh(value));
   }
 
-  public static function writeInt32(buffer:WritingBuffer, value:Types.TYPE_INT32):Void
+  public static inline function writeInt32(buffer:WritingBuffer, value:Types.TYPE_INT32):Void
   {
     if (value < 0)
     {
@@ -135,52 +135,52 @@ import haxe.Int64;
     }
   }
 
-  public static function writeFixed64(buffer:WritingBuffer, value:Types.TYPE_FIXED64):Void
+  public static inline function writeFixed64(buffer:WritingBuffer, value:Types.TYPE_FIXED64):Void
   {
     buffer.writeInt32(Int64.getLow(value));
     buffer.writeInt32(Int64.getHigh(value));
   }
 
-  public static function writeFixed32(buffer:WritingBuffer, value:Types.TYPE_FIXED32):Void
+  public static inline function writeFixed32(buffer:WritingBuffer, value:Types.TYPE_FIXED32):Void
   {
     buffer.writeInt32(value);
   }
 
-  public static function writeBool(buffer:WritingBuffer, value:Types.TYPE_BOOL):Void
+  public static inline function writeBool(buffer:WritingBuffer, value:Types.TYPE_BOOL):Void
   {
     buffer.writeByte(value ? 1 : 0);
   }
 
-  public static function writeString(buffer:WritingBuffer, value:Types.TYPE_STRING):Void
+  public static inline function writeString(buffer:WritingBuffer, value:Types.TYPE_STRING):Void
   {
     var i = buffer.beginBlock();
     buffer.writeString(value);
     buffer.endBlock(i);
   }
 
-  public static function writeBytes(buffer:WritingBuffer, value:Types.TYPE_BYTES):Void
+  public static inline function writeBytes(buffer:WritingBuffer, value:Types.TYPE_BYTES):Void
   {
     writeUint32(buffer, value.length);
     buffer.writeFullBytes(value, 0, value.length);
   }
 
-  public static function writeSfixed32(buffer:WritingBuffer, value:Types.TYPE_SFIXED32):Void
+  public static inline function writeSfixed32(buffer:WritingBuffer, value:Types.TYPE_SFIXED32):Void
   {
     buffer.writeInt32(value);
   }
 
-  public static function writeSfixed64(buffer:WritingBuffer, value:Types.TYPE_SFIXED64):Void
+  public static inline function writeSfixed64(buffer:WritingBuffer, value:Types.TYPE_SFIXED64):Void
   {
     buffer.writeInt32(Int64.getLow(value));
     buffer.writeInt32(Int64.getHigh(value));
   }
 
-  public static function writeSint32(buffer:WritingBuffer, value:Types.TYPE_SINT32):Void
+  public static inline function writeSint32(buffer:WritingBuffer, value:Types.TYPE_SINT32):Void
   {
     writeUint32(buffer, ZigZag.encode32(value));
   }
 
-  public static function writeSint64(buffer:WritingBuffer, value:Types.TYPE_SINT64):Void
+  public static inline function writeSint64(buffer:WritingBuffer, value:Types.TYPE_SINT64):Void
   {
     writeVarint64(buffer,
         ZigZag.encode64low(Int64.getLow(value), Int64.getHigh(value)),
