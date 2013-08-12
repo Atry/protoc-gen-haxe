@@ -60,7 +60,7 @@ private typedef StringMap<Value> = Hash<Value>;
 @:final class ReadUtils
 {
 
-  public static function mergerUnknownField(unknownFields:UnknownFieldMap, tag:Int, value:UnknownField)
+  public static inline function mergerUnknownField(unknownFields:UnknownFieldMap, tag:Int, value:UnknownField)
   {
     var originalValue = unknownFields.get(tag);
     if (originalValue == null)
@@ -123,7 +123,7 @@ private typedef StringMap<Value> = Hash<Value>;
     }
   }
 
-  public static function mergeDelimitedFrom<Builder:{ var unknownFields:UnknownFieldMap; }>(fieldMap:FieldMap<Builder>, builder:Builder, input:ILimitableInput):Void
+  public static inline function mergeDelimitedFrom<Builder:{ var unknownFields:UnknownFieldMap; }>(fieldMap:FieldMap<Builder>, builder:Builder, input:ILimitableInput):Void
   {
     var length = readUint32(input);
     var bytesAfterMessage = input.limit - length;
@@ -132,13 +132,13 @@ private typedef StringMap<Value> = Hash<Value>;
     input.limit = bytesAfterMessage;
   }
 
-  public static function readString(input:ILimitableInput):Types.TYPE_STRING
+  public static inline function readString(input:ILimitableInput):Types.TYPE_STRING
   {
     var length = ReadUtils.readUint32(input);
     return input.checkedReadString(length);
   }
 
-  public static function readBytes(input:ILimitableInput):Types.TYPE_BYTES
+  public static inline function readBytes(input:ILimitableInput):Types.TYPE_BYTES
   {
     var length = ReadUtils.readUint32(input);
     var bytes = Bytes.alloc(length);
@@ -146,27 +146,27 @@ private typedef StringMap<Value> = Hash<Value>;
     return bytes;
   }
 
-  public static function readBool(input:ILimitableInput):Types.TYPE_BOOL
+  public static inline function readBool(input:ILimitableInput):Types.TYPE_BOOL
   {
     return readUint32(input) != 0;
   }
 
-  public static function readInt32(input:ILimitableInput):Types.TYPE_INT32
+  public static inline function readInt32(input:ILimitableInput):Types.TYPE_INT32
   {
     return cast readUint32(input);
   }
 
-  public static function readDouble(input:ILimitableInput):Types.TYPE_DOUBLE
+  public static inline function readDouble(input:ILimitableInput):Types.TYPE_DOUBLE
   {
     return input.checkedReadDouble();
   }
 
-  public static function readFloat(input:ILimitableInput):Types.TYPE_FLOAT
+  public static inline function readFloat(input:ILimitableInput):Types.TYPE_FLOAT
   {
     return input.checkedReadFloat();
   }
 
-  public static function readFixed64(input:ILimitableInput):Types.TYPE_FIXED64
+  public static inline function readFixed64(input:ILimitableInput):Types.TYPE_FIXED64
   {
     var low = input.checkedReadInt32();
     var high = input.checkedReadInt32();
@@ -177,17 +177,17 @@ private typedef StringMap<Value> = Hash<Value>;
     #end
   }
 
-  public static function readFixed32(input:ILimitableInput):Types.TYPE_FIXED32
+  public static inline function readFixed32(input:ILimitableInput):Types.TYPE_FIXED32
   {
     return input.checkedReadInt32();
   }
 
-  public static function readSfixed32(input:ILimitableInput):Types.TYPE_SFIXED32
+  public static inline function readSfixed32(input:ILimitableInput):Types.TYPE_SFIXED32
   {
     return input.checkedReadInt32();
   }
 
-  public static function readSfixed64(input:ILimitableInput):Types.TYPE_SFIXED64
+  public static inline function readSfixed64(input:ILimitableInput):Types.TYPE_SFIXED64
   {
     var low = input.checkedReadInt32();
     var high = input.checkedReadInt32();
@@ -198,12 +198,12 @@ private typedef StringMap<Value> = Hash<Value>;
     #end
   }
 
-  public static function readSint32(input:ILimitableInput):Types.TYPE_SINT32
+  public static inline function readSint32(input:ILimitableInput):Types.TYPE_SINT32
   {
     return ZigZag.decode32(readUint32(input));
   }
 
-  public static function readSint64(input:ILimitableInput):Types.TYPE_SINT64
+  public static inline function readSint64(input:ILimitableInput):Types.TYPE_SINT64
   {
     var beforeTransform = readInt64(input);
     #if haxe3
@@ -221,39 +221,6 @@ private typedef StringMap<Value> = Hash<Value>;
     return Types.TYPE_FIXED64.make(Int32.ofInt(transformedLow), Int32.ofInt(transformedHigh));
     #end
   }
-//
-  //static function readRawVarint32<I:ILimitableInput>(firstByte:Int, input:I):Types.TYPE_UINT32
-  //{
-    //if ((firstByte & 0x80) == 0) {
-      //return firstByte;
-    //}
-//
-    //var result = firstByte & 0x7f;
-    //var offset = 7;
-    //while (offset < 32) {
-      //var b = input.checkedReadByte();
-      //if (b == 255) {
-        //throw Error.TruncatedMessage;
-      //}
-      //result |= (b & 0x7f) << offset;
-      //if ((b & 0x80) == 0) {
-        //return result;
-      //}
-      //offset += 7;
-    //}
-    // Keep reading up to 64 bits.
-    //while (offset < 64) {
-      //var b = input.checkedReadByte();
-      //if (b == 255) {
-        //throw Error.TruncatedMessage;
-      //}
-      //if ((b & 0x80) == 0) {
-        //return result;
-      //}
-      //offset += 7;
-    //}
-    //throw Error.MalformedVarint;
-  //}
 
   public static function readUint32(input:ILimitableInput):Types.TYPE_UINT32
   {
@@ -284,7 +251,7 @@ private typedef StringMap<Value> = Hash<Value>;
     return result;
   }
 
-  public static function readInt64(input:ILimitableInput):Types.TYPE_INT64
+  public static inline function readInt64(input:ILimitableInput):Types.TYPE_INT64
   {
     return readUint64(input);
   }
