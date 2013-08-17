@@ -41,7 +41,7 @@ typedef TYPE_STRING = String.String;
 //TYPE_ENUM;
 //TYPE_MESSAGE;
 typedef TYPE_BYTES = haxe.io.Bytes;
-#if (flash9 || flash9doc || cs)
+#if (flash9 || flash9doc)
   typedef TYPE_UINT32 = StdTypes.UInt;
   typedef TYPE_FIXED32 = StdTypes.UInt;
 #else

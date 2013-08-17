@@ -48,8 +48,8 @@ class WritingBuffer extends BytesOutput
 		var b: { private var b(default, never):String; } = this.b;
 		return b.b.length;
 		#elseif cs
-		var b: { private var b(default, never):system.io.MemoryStream; } = this.b;
-		return b.b.Length;
+		var b: { private var b(default, never):cs.system.io.MemoryStream; } = this.b;
+		return haxe.Int64.toInt(b.b.Length);
 		#elseif java
 		var b: { private var b(default, never):java.io.ByteArrayOutputStream; } = this.b;
 		return b.b.size();
