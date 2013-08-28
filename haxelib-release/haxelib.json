@@ -1,11 +1,11 @@
 {
   "name": "protoc-gen-haxe",
   "license": "BSD",
-  "tags": ["cross","utility","serialization","protobuf","serializer","marshaller","js","javascript","nme","cpp","flash","neko","php"],
+  "tags": ["cross","utility","serialization","protobuf","serializer","marshaller","js","javascript","nme","cpp","flash","neko","php","cs","java"],
   "description": "Protocol Buffers for Haxe",
   "contributors": ["Atry"],
-  "releasenote": "Renamed Input stream classes and methods to avoid naming conflict with those methods in flash.utils.IDataInput and haxe.io.Input.",
-  "version": "1.1.0",
+  "releasenote": "Included LICENSE in release",
+  "version": "1.2.1",
   "url": "https://github.com/Atry/protoc-gen-haxe",
   "dependencies": {
 
