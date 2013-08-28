@@ -118,7 +118,7 @@ class Extension
           var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
           var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
           var nestedEnumClassExpr = packageDotClass(enumPackageExpr, enumClassName);
-          return macro com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional(com.dongxiguo.protobuf.unknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber(value)));
+          return macro com.dongxiguo.protobuf.unknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber(value));
         }
         default:
         {
@@ -156,7 +156,7 @@ class Extension
               throw ProtobufError.MalformedEnumConstructor;
             }
           }
-          return macro com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional(com.dongxiguo.protobuf.unknownField.$abstractTypeName.$fromFunctionName($valueExpr));
+          return macro com.dongxiguo.protobuf.unknownField.$abstractTypeName.$fromFunctionName($valueExpr);
         }
       }
     }
@@ -202,17 +202,16 @@ class Extension
                     WireType.byType(field.type) | (field.number << 3)))),
                 }
                 var unknownFieldValueExpr = unknownFieldFromValue(macro value);
-                var requiredExpr =
-                macro
-                {
-                  var unknownFields = self.unknownFields;
-                  if (unknownFields == null)
+                var requiredExpr = macro
                   {
-                    unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
-                    self.unknownFields = unknownFields;
+                    var unknownFields = self.unknownFields;
+                    if (unknownFields == null)
+                    {
+                      unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
+                      self.unknownFields = unknownFields;
+                    }
+                    unknownFields.set($nonPackedTagExpr, com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional($unknownFieldValueExpr));
                   }
-                  unknownFields.set($nonPackedTagExpr, $unknownFieldValueExpr);
-                }
                 if (field.label == LABEL_REQUIRED)
                 {
                   requiredExpr;
@@ -275,7 +274,7 @@ class Extension
                         unknownFields = new com.dongxiguo.protobuf.unknownField.UnknownFieldMap();
                         self.unknownFields = unknownFields;
                       }
-                      unknownFields.set($packedTagExpr, bytes);
+                      unknownFields.set($packedTagExpr, com.dongxiguo.protobuf.unknownField.UnknownField.fromOptional(bytes));
                     }
                     else
                     {
@@ -306,14 +305,14 @@ class Extension
                     }
                     inline function dummy<T>(i:Iterable<T>) { }
                     dummy(value);
-                    var fieldValues =
+                    var fieldValues:Array<com.dongxiguo.protobuf.unknownField.UnknownFieldElement> =
                     [
                       for (element in value)
                       {
                         $unknownFieldValueExpr;
                       }
                     ];
-                    unknownFields.set($nonPackedTagExpr, fieldValues);
+                    unknownFields.set($nonPackedTagExpr, com.dongxiguo.protobuf.unknownField.UnknownField.fromRepeated(fieldValues));
                   }
                 }
               }

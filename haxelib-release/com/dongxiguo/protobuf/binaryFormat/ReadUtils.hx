@@ -31,6 +31,7 @@ package com.dongxiguo.protobuf.binaryFormat;
 
 import com.dongxiguo.protobuf.Error;
 import com.dongxiguo.protobuf.unknownField.UnknownField;
+import com.dongxiguo.protobuf.unknownField.UnknownFieldElement;
 import com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
 import com.dongxiguo.protobuf.compiler.NameConverter;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
@@ -60,12 +61,12 @@ private typedef StringMap<Value> = Hash<Value>;
 @:final class ReadUtils
 {
 
-  public static inline function mergerUnknownField(unknownFields:UnknownFieldMap, tag:Int, value:UnknownField)
+  public static inline function mergerUnknownField(unknownFields:UnknownFieldMap, tag:Int, value:UnknownFieldElement)
   {
     var originalValue = unknownFields.get(tag);
     if (originalValue == null)
     {
-      unknownFields.set(tag, value);
+      unknownFields.set(tag, UnknownField.fromOptional(value));
     }
     else if (Std.is(originalValue, Array))
     {
@@ -73,7 +74,7 @@ private typedef StringMap<Value> = Hash<Value>;
     }
     else
     {
-      unknownFields.set(tag, [ originalValue, value ]);
+      unknownFields.set(tag, UnknownField.fromRepeated([ originalValue.toOptional(), value ]));
     }
   }
 
