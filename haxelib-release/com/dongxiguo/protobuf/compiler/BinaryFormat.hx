@@ -407,42 +407,39 @@ class BinaryFormat
     };
   }
 
-  static var WRITE_TO_FUNCTION(null, never) =
-    switch (macro function(message, output:haxe.io.Output):Void
-    {
-      var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
-      writeFields(message, buffer);
-      com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
-        buffer,
-        message.unknownFields);
-      buffer.toNormal(output);
-    })
-    {
-      case { expr: EFunction(_, f), } : f;
-      default: throw "Assertion failed!";
-    };
+  static var WRITE_TO_FUNCTION_BODY(null, never) = macro
+  {
+    var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
+    writeFields(message, buffer);
+    com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
+      buffer,
+      message.unknownFields);
+    buffer.toNormal(output);
+  };
 
-  static var WRITE_DELIMITED_TO_FUNCTION(null, never) =
-    switch (macro function(message, output:haxe.io.Output):Void
-    {
-      var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
-      var i = buffer.beginBlock();
-      writeFields(message, buffer);
-      com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
-        buffer,
-        message.unknownFields);
-      buffer.endBlock(i);
-      buffer.toNormal(buffer);
-    })
-    {
-      case { expr: EFunction(_, f), } : f;
-      default: throw "Assertion failed!";
-    };
+  static var WRITE_DELIMITED_TO_FUNCTION_BODY(null, never) = macro
+  {
+    var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
+    var i = buffer.beginBlock();
+    writeFields(message, buffer);
+    com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUnknownField(
+      buffer,
+      message.unknownFields);
+    buffer.endBlock(i);
+    buffer.toNormal(buffer);
+  };
 
   static var WRITING_BUFFER_COMPLEX_TYPE(default, never) = TPath(
     {
       pack: [ "com", "dongxiguo", "protobuf", "binaryFormat" ],
       name: "WritingBuffer",
+      params: [],
+    });
+
+  static var OUTPUT_COMPLEX_TYPE(default, never) = TPath(
+    {
+      pack: [ "haxe", "io" ],
+      name: "Output",
       params: [],
     });
 
@@ -475,16 +472,40 @@ class BinaryFormat
           name: "writeFields",
           access: [ AStatic, APublic ],
           pos: makeMacroPosition(),
-          meta: [],
+          meta:
+          [
+            // This must be disabled before https://github.com/HaxeFoundation/haxe/issues/2070 being resolved
+            /*
+            {
+              name: ":generic",
+              params: [],
+              pos: makeMacroPosition(),
+            }
+            */
+          ],
           kind: FFun(
             {
-              params: [],
+              params:
+              [
+                {
+                  name: "MessageTypeParameter",
+                  constraints:
+                  [
+                    messageType,
+                  ]
+                }
+              ],
               args:
               [
                 {
                   name: "message",
                   opt: false,
-                  type: messageType,
+                  type: TPath(
+                    {
+                      pack: [],
+                      name: "MessageTypeParameter",
+                      params: [],
+                    }),
                   value: null,
                 },
                 {
@@ -633,15 +654,103 @@ class BinaryFormat
           name: "writeTo",
           access: [ APublic, AStatic, AInline ],
           pos: makeMacroPosition(),
-          meta: [],
-          kind: FFun(WRITE_TO_FUNCTION)
+          meta:
+          [
+            // This must be disabled before https://github.com/HaxeFoundation/haxe/issues/2070 being resolved
+            /*
+            {
+              name: ":generic",
+              params: [],
+              pos: makeMacroPosition(),
+            }
+            */
+          ],
+          kind: FFun(
+            {
+              params:
+              [
+                {
+                  name: "MessageTypeParameter",
+                  constraints:
+                  [
+                    messageType,
+                  ]
+                }
+              ],
+              args:
+              [
+                {
+                  name: "message",
+                  opt: false,
+                  type: TPath(
+                    {
+                      pack: [],
+                      name: "MessageTypeParameter",
+                      params: [],
+                    }),
+                  value: null,
+                },
+                {
+                  name: "output",
+                  opt: false,
+                  type: OUTPUT_COMPLEX_TYPE,
+                  value: null,
+                },
+              ],
+              ret: null,
+              expr: WRITE_TO_FUNCTION_BODY
+            })
         },
         {
           name: "writeDelimitedTo",
           access: [ APublic, AStatic, AInline ],
           pos: makeMacroPosition(),
-          meta: [],
-          kind: FFun(WRITE_DELIMITED_TO_FUNCTION)
+          meta:
+          [
+            // This must be disabled before https://github.com/HaxeFoundation/haxe/issues/2070 being resolved
+            /*
+            {
+              name: ":generic",
+              params: [],
+              pos: makeMacroPosition(),
+            }
+            */
+          ],
+          kind: FFun(
+            {
+              params:
+              [
+                {
+                  name: "MessageTypeParameter",
+                  constraints:
+                  [
+                    messageType,
+                  ]
+                }
+              ],
+              args:
+              [
+                {
+                  name: "message",
+                  opt: false,
+                  type: TPath(
+                    {
+                      pack: [],
+                      name: "MessageTypeParameter",
+                      params: [],
+                    }),
+                  value: null,
+                },
+                {
+                  name: "output",
+                  opt: false,
+                  type: OUTPUT_COMPLEX_TYPE,
+                  value: null,
+                },
+              ],
+              ret: null,
+              expr: WRITE_DELIMITED_TO_FUNCTION_BODY
+            })
         }
       ]
     };
