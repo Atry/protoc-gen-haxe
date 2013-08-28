@@ -1,7 +1,8 @@
 all release.zip: \
 haxelib-release/haxelib.json \
 haxelib-release/run.n \
-haxelib-release/haxedoc.xml
+haxelib-release/haxedoc.xml \
+haxelib-release/LICENSE
 
 all release.zip haxelib-release/haxedoc.xml haxelib-release/run.n: \
 $(wildcard haxelib-release/com/dongxiguo/protobuf/compiler/bootstrap/google/protobuf/*.hx haxelib-release/com/dongxiguo/protobuf/compiler/bootstrap/google/protobuf/*/*.hx haxelib-release/com/dongxiguo/protobuf/*/*.hx haxelib-release/com/dongxiguo/protobuf/*.hx)
