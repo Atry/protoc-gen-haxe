@@ -53,6 +53,9 @@ class WritingBuffer extends BytesOutput
 		#elseif java
 		var b: { private var b(default, never):java.io.ByteArrayOutputStream; } = this.b;
 		return b.b.size();
+		#elseif cpp
+		var b: { private var b(default, never):haxe.io.BytesData; } = this.b;
+		return b.b.length;
 		#else
 		var b: { private var b(default, never):Array<Int>; } = this.b;
 		return b.b.length;
