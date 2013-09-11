@@ -2,28 +2,16 @@ package ;
 
 import haxe.io.BytesInput;
 import haxe.io.BytesOutput;
-import haxe.unit.TestCase;
-import haxe.unit.TestRunner;
-import neko.Lib;
+import massive.munit.Assert;
 
 import com.dongxiguo.protobuf.binaryFormat.LimitableBytesInput;
 import samplePackage.Optional_Builder;
 using samplePackage.Optional_Merger;
 using samplePackage.Optional_Writer;
 
-/**
- * Tests for protobuf
- * @author AxGord <axgord@gmail.com>
- */
-
-class Main extends TestCase {
-	
-	static function main() {
-		var r = new TestRunner();
-		r.add(new Main());
-		r.run();
-	}
-	
+class OptionalTest 
+{
+	@Test
 	public function testOptionalString():Void {
 		
 		var b = new Optional_Builder();
@@ -35,9 +23,10 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(rb.tString, 'hello');
+		Assert.areEqual(rb.tString, 'hello');
 	}
 	
+	@Test
 	public function testOptionalEmpty():Void {
 		
 		var b = new Optional_Builder();
@@ -48,12 +37,13 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(rb.tString, null);
-		assertEquals(rb.tInt, null);
-		assertEquals(rb.tBool, null);
-		assertEquals(rb.tFloat, null);
+		Assert.isNull(rb.tString);
+		Assert.isNull(rb.tInt);
+		Assert.isNull(rb.tBool);
+		Assert.isNull(rb.tFloat);
 	}
 	
+	@Test
 	public function testOptionalInt():Void {
 		
 		var b = new Optional_Builder();
@@ -65,10 +55,11 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(rb.tInt, 3);
+		Assert.areEqual(rb.tInt, 3);
 	}
 	
 	
+	@Test
 	public function testOptionalInt0():Void {
 		
 		var b = new Optional_Builder();
@@ -80,9 +71,10 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(rb.tInt, 0);
+		Assert.areEqual(rb.tInt, 0);
 	}
 	
+	@Test
 	public function testOptionalFloat():Void {
 		
 		
@@ -95,9 +87,10 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(Math.floor(rb.tFloat*1000), 3654);
+		Assert.areEqual(Math.floor(rb.tFloat*100), 365);
 	}
 	
+	@Test
 	public function testOptionalFloat0():Void {
 		
 		var b = new Optional_Builder();
@@ -109,9 +102,10 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertEquals(rb.tFloat, 0);
+		Assert.areEqual(rb.tFloat, 0);
 	}
 	
+	@Test
 	public function testOptionalBool():Void {
 		
 		var b = new Optional_Builder();
@@ -123,9 +117,10 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertTrue(rb.tBool);
+		Assert.isTrue(rb.tBool);
 	}
 	
+	@Test
 	public function testOptionalFalse():Void {
 		
 		var b = new Optional_Builder();
@@ -137,8 +132,6 @@ class Main extends TestCase {
 		var rb = new Optional_Builder();
 		rb.mergeFrom(new LimitableBytesInput(inp.readAll()));
 		
-		assertFalse(rb.tBool);
+		Assert.isFalse(rb.tBool);
 	}
-	
-	
 }

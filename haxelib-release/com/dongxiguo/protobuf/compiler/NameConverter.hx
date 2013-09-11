@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 package com.dongxiguo.protobuf.compiler;
-#if macro
+#if !cs
 /**
  * @author 杨博
  */

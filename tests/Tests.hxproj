@@ -2,7 +2,7 @@
 <project version="2">
   <!-- Output SWF options -->
   <output>
-    <movie outputType="Application" />
+    <movie outputType="CustomBuild" />
     <movie input="" />
     <movie path="bin\Tests.n" />
     <movie fps="0" />
@@ -15,7 +15,7 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="src" />
+    <class path="test" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -28,6 +28,7 @@
   <!-- haxelib libraries -->
   <haxelib>
     <library name="protoc-gen-haxe" />
+    <library name="munit" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
@@ -40,7 +41,7 @@
   <!-- Executed before build -->
   <preBuildCommand />
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">neko bin/Tests.n</postBuildCommand>
+  <postBuildCommand alwaysRun="False">haxelib run munit test -neko</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />
