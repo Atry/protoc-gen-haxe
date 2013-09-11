@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 package com.dongxiguo.protobuf.compiler;
-
+#if !cs
 /**
  * @author 杨博
  */
@@ -120,6 +120,7 @@ package com.dongxiguo.protobuf.compiler;
   }
 
 }
+#end
 
 typedef MessageNameConverter =
 {

@@ -1,0 +1,8 @@
+package samplePackage;
+
+message Optional {
+	optional int32 tInt = 1;
+	optional float tFloat = 2;
+	optional bool tBool = 3;
+	optional string tString = 4;
+}
