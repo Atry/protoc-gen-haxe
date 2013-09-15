@@ -33,16 +33,8 @@ import com.dongxiguo.protobuf.Error;
 import com.dongxiguo.protobuf.unknownField.UnknownField;
 import com.dongxiguo.protobuf.unknownField.UnknownFieldElement;
 import com.dongxiguo.protobuf.unknownField.UnknownFieldMap;
-import com.dongxiguo.protobuf.compiler.NameConverter;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Label;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileDescriptorSet;
 import com.dongxiguo.protobuf.WireType;
 import haxe.io.Bytes;
-import haxe.io.BytesData;
 
 using Type;
 
