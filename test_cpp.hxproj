@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project version="2">
+  <!-- Output SWF options -->
+  <output>
+    <movie outputType="Application" />
+    <movie input="" />
+    <movie path="test_cpp" />
+    <movie fps="0" />
+    <movie width="1" />
+    <movie height="1" />
+    <movie version="1" />
+    <movie minorVersion="0" />
+    <movie platform="C++" />
+    <movie background="#FFFFFF" />
+    <movie preferredSDK="Haxe 3.0.0;3.0.0;" />
+  </output>
+  <!-- Other classes to be compiled into your SWF -->
+  <classpaths>
+    <class path="test" />
+    <class path="haxelib-release" />
+  </classpaths>
+  <!-- Build options -->
+  <build>
+    <option directives="" />
+    <option flashStrict="True" />
+    <option mainClass="com.dongxiguo.protobuf.test.TestMain" />
+    <option enabledebug="True" />
+    <option additional="--macro&#xA;com.dongxiguo.protobuf.commandLine.Importer.importDescroptorFileSet('unittest.proto.bin')&#xA;--gen-hx-classes" />
+  </build>
+  <!-- haxelib libraries -->
+  <haxelib>
+    <!-- example: <library name="..." /> -->
+  </haxelib>
+  <!-- Class files to compile (other referenced classes will automatically be included) -->
+  <compileTargets>
+    <compile path="src\Main.hx" />
+    <compile path="haxelib-release\google\protobuf\Descriptor.hx" />
+    <compile path="haxelib-release\com\dongxiguo\protobuf\WritingBuffer.hx" />
+    <compile path="test\com\dongxiguo\protobuf\test\TestMain.hx" />
+  </compileTargets>
+  <!-- Paths to exclude from the Project Explorer tree -->
+  <hiddenPaths>
+    <!-- example: <hidden path="..." /> -->
+  </hiddenPaths>
+  <!-- Executed before build -->
+  <preBuildCommand />
+  <!-- Executed after build -->
+  <postBuildCommand alwaysRun="False" />
+  <!-- Other project options -->
+  <options>
+    <option showHiddenPaths="False" />
+    <option testMovie="OpenDocument" />
+    <option testMovieCommand="" />
+  </options>
+  <!-- Plugin storage -->
+  <storage />
+</project>

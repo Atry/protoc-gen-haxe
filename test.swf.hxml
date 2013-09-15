@@ -1,0 +1,10 @@
+-cp test
+-cp haxelib-release
+-swf test.swf
+-swf-header 100:100:1:FFFFFF
+--flash-strict
+-swf-version 10
+-main com.dongxiguo.protobuf.test.TestMain
+--macro
+com.dongxiguo.protobuf.commandLine.Importer.importDescroptorFileSet('unittest.proto.bin')
+--gen-hx-classes

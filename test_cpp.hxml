@@ -1,0 +1,7 @@
+-cp test
+-cp haxelib-release
+-cpp test_cpp
+-main com.dongxiguo.protobuf.test.TestMain
+--macro
+com.dongxiguo.protobuf.commandLine.Importer.importDescroptorFileSet('unittest.proto.bin')
+--gen-hx-classes

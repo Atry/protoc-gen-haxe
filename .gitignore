@@ -3,3 +3,13 @@
 /haxelib-release/run.n
 /release.zip
 /haxelib-release/haxedoc.xml
+/tests/dump/
+/tests/build/
+/tests/report/
+/google
+/test.js
+/test.n
+/test.swf
+/test_cpp
+/unittest.proto.bin
+/descriptor.proto.bin
