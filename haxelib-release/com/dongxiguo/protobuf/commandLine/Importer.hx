@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -58,7 +58,7 @@ using com.dongxiguo.protobuf.compiler.Extension;
 /**
   @author 杨博
 **/
-@:require(neko) class Importer
+class Importer
 {
 
   public static var DEFAULT_READONLY_MESSAGE_NAME_CONVERTER(default, never):MessageNameConverter =
@@ -198,18 +198,6 @@ using com.dongxiguo.protobuf.compiler.Extension;
     },
   };
 
-  public static var DEFAULT_ENUM_CLASS_NAME_CONVERTER(default, never):UtilityNameConverter =
-  {
-    getHaxeClassName: function(protoFullyQualifiedName:String):String
-    {
-      return NameConverter.getClassName(protoFullyQualifiedName) + "_EnumClass";
-    },
-    getHaxePackage: function(fullyQualifiedName:String):Array<String>
-    {
-      return NameConverter.replaceKeywords(NameConverter.getLowerCamelCasePackage(fullyQualifiedName));
-    },
-  };
-
   @:noUsing
   public static function readProtoData(fileName:String):ProtoData
   {
@@ -244,13 +232,8 @@ using com.dongxiguo.protobuf.compiler.Extension;
     for (fullName in self.enums.keys())
     {
       Context.defineType(
-        self.getFakeEnumDefinition(
+        self.getEnumDefinition(
           fullName,
-          DEFAULT_ENUM_NAME_CONVERTER));
-      Context.defineType(
-        self.getFakeEnumClassDefinition(
-          fullName,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
           DEFAULT_ENUM_NAME_CONVERTER));
     }
   }
@@ -281,7 +264,6 @@ using com.dongxiguo.protobuf.compiler.Extension;
           fullName,
           DEFAULT_MESSAGE_SETTER_NAME_CONVERTER,
           DEFAULT_BUILDER_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
           DEFAULT_WRITER_NAME_CONVERTER);
       if (typeDefinition != null)
       {
@@ -299,7 +281,6 @@ using com.dongxiguo.protobuf.compiler.Extension;
           fullName,
           DEFAULT_PACKAGE_SETTER_NAME_CONVERTER,
           DEFAULT_BUILDER_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
           DEFAULT_WRITER_NAME_CONVERTER);
       if (typeDefinition != null)
       {
@@ -319,7 +300,6 @@ using com.dongxiguo.protobuf.compiler.Extension;
           DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
           DEFAULT_BUILDER_NAME_CONVERTER,
           DEFAULT_ENUM_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
           DEFAULT_MERGER_NAME_CONVERTER);
       if (typeDefinition != null)
       {
@@ -339,7 +319,6 @@ using com.dongxiguo.protobuf.compiler.Extension;
           DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
           DEFAULT_BUILDER_NAME_CONVERTER,
           DEFAULT_ENUM_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER,
           DEFAULT_MERGER_NAME_CONVERTER);
       if (typeDefinition != null)
       {
@@ -370,7 +349,7 @@ using com.dongxiguo.protobuf.compiler.Extension;
           fullName,
           DEFAULT_MERGER_NAME_CONVERTER,
           DEFAULT_BUILDER_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER));
+          DEFAULT_ENUM_NAME_CONVERTER));
     }
   }
 
@@ -382,8 +361,7 @@ using com.dongxiguo.protobuf.compiler.Extension;
         self.getWriterDefinition(
           fullName,
           DEFAULT_WRITER_NAME_CONVERTER,
-          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER,
-          DEFAULT_ENUM_CLASS_NAME_CONVERTER));
+          DEFAULT_READONLY_MESSAGE_NAME_CONVERTER));
     }
   }
 

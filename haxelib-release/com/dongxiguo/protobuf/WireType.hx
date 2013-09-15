@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,7 +29,7 @@
 
 package com.dongxiguo.protobuf;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
+private typedef ProtobufType = com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
 
 /**
  * @author 杨博
@@ -42,19 +42,21 @@ class WireType
   @:extern public static inline var FIXED_32_BIT = 5;
 
   @:noUsing
-  public static function byType(type:Type):Int
+  public static function byType(type:ProtobufType):Int
   {
     return switch (type)
     {
-      case TYPE_DOUBLE, TYPE_FIXED64, TYPE_SFIXED64:
+      case ProtobufType.TYPE_DOUBLE, ProtobufType.TYPE_FIXED64, ProtobufType.TYPE_SFIXED64:
         FIXED_64_BIT;
-      case TYPE_FLOAT, TYPE_FIXED32, TYPE_SFIXED32:
+      case ProtobufType.TYPE_FLOAT, ProtobufType.TYPE_FIXED32, ProtobufType.TYPE_SFIXED32:
         FIXED_32_BIT;
-      case TYPE_INT32, TYPE_INT64, TYPE_UINT32, TYPE_UINT64, TYPE_SINT32, TYPE_SINT64, TYPE_BOOL, TYPE_ENUM:
+      case ProtobufType.TYPE_INT32, ProtobufType.TYPE_INT64, ProtobufType.TYPE_UINT32, ProtobufType.TYPE_UINT64, ProtobufType.TYPE_SINT32, ProtobufType.TYPE_SINT64, ProtobufType.TYPE_BOOL, ProtobufType.TYPE_ENUM:
         VARINT;
-      case TYPE_STRING, TYPE_MESSAGE, TYPE_BYTES:
+      case ProtobufType.TYPE_STRING, ProtobufType.TYPE_MESSAGE, ProtobufType.TYPE_BYTES:
         LENGTH_DELIMITED;
-      case TYPE_GROUP:
+      case ProtobufType.TYPE_GROUP:
+        throw Error.NotImplemented;
+      default:
         throw Error.NotImplemented;
     }
   }

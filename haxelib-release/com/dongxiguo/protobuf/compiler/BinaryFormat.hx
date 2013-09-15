@@ -111,12 +111,35 @@ class BinaryFormat
     };
   }
 
+  static function getTypeName(type:ProtobufType):String
+  {
+    return switch (type)
+    {
+      case ProtobufType.TYPE_DOUBLE: "TYPE_DOUBLE";
+      case ProtobufType.TYPE_FLOAT: "TYPE_FLOAT";
+      case ProtobufType.TYPE_INT64: "TYPE_INT64";
+      case ProtobufType.TYPE_UINT64: "TYPE_UINT64";
+      case ProtobufType.TYPE_INT32: "TYPE_INT32";
+      case ProtobufType.TYPE_FIXED64: "TYPE_FIXED64";
+      case ProtobufType.TYPE_BOOL: "TYPE_BOOL";
+      case ProtobufType.TYPE_STRING: "TYPE_STRING";
+      case ProtobufType.TYPE_BYTES: "TYPE_BYTES";
+      case ProtobufType.TYPE_UINT32: "TYPE_UINT32";
+      case ProtobufType.TYPE_FIXED32: "TYPE_FIXED32";
+      case ProtobufType.TYPE_SFIXED32: "TYPE_SFIXED32";
+      case ProtobufType.TYPE_SFIXED64: "TYPE_SFIXED64";
+      case ProtobufType.TYPE_SINT32: "TYPE_SINT32";
+      case ProtobufType.TYPE_SINT64: "TYPE_SINT64";
+      default: throw ProtobufError.BadDescriptor;
+    }
+  }
+
   public static function getMergerDefinition(
     self:ProtoData,
     fullName:String,
     mergerNameConverter:UtilityNameConverter,
     builderNameConverter:MessageNameConverter,
-    enumClassNameConverter:UtilityNameConverter):TypeDefinition
+    enumNameConverter:EnumNameConverter):TypeDefinition
   {
     var builderType = TPath(
     {
@@ -189,14 +212,21 @@ class BinaryFormat
         case ProtobufType.TYPE_ENUM:
         {
           var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullName, field.typeName);
-          var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
-          var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
-          macro $enumPackageExpr.$enumClassName.valueOf(
-            com.dongxiguo.protobuf.binaryFormat.ReadUtils.readInt32(input));
+          {
+            pos: makeMacroPosition(),
+            expr: ENew(
+              {
+                params: [],
+                pack: enumNameConverter.getHaxePackage(resolvedFieldTypeName),
+                name: enumNameConverter.getHaxeEnumName(resolvedFieldTypeName),
+              },
+              [ macro com.dongxiguo.protobuf.binaryFormat.ReadUtils.readInt32(input), ]),
+          }
         }
         default:
         {
-          var readFunctionName = switch (Type.enumConstructor(field.type).split("_"))
+          var typeName:String = getTypeName(field.type);
+          var readFunctionName = switch (typeName.split("_"))
           {
             case [ "TYPE", upperCaseTypeName ]:
             {
@@ -240,13 +270,17 @@ class BinaryFormat
                 ret: null,
                 expr: switch (field.label)
                 {
-                  case LABEL_REQUIRED, LABEL_OPTIONAL:
+                  case Label.LABEL_REQUIRED, Label.LABEL_OPTIONAL:
                   {
                     macro builder.$fieldName = $readExpr;
                   }
-                  case LABEL_REPEATED:
+                  case Label.LABEL_REPEATED:
                   {
                     macro builder.$fieldName.push($readExpr);
+                  }
+                  default:
+                  {
+                    throw ProtobufError.BadDescriptor;
                   }
                 },
               }),
@@ -260,7 +294,7 @@ class BinaryFormat
             makeTagExpr(WireType.byType(field.type) | (field.number << 3));
           switch (field.label)
           {
-            case LABEL_REQUIRED, LABEL_OPTIONAL:
+            case Label.LABEL_REQUIRED, Label.LABEL_OPTIONAL:
             {
               var functionExpr =
               {
@@ -288,7 +322,7 @@ class BinaryFormat
               }
               insertions.push(macro fieldMap.set($nonPackedTagExpr, $functionExpr));
             }
-            case LABEL_REPEATED:
+            case Label.LABEL_REPEATED:
             {
               var nonPackedFunctionExpr =
               {
@@ -446,8 +480,7 @@ class BinaryFormat
     self:ProtoData,
     fullName:String,
     writerNameConverter:UtilityNameConverter,
-    messageNameConverter:MessageNameConverter,
-    enumClassNameConverter:UtilityNameConverter):TypeDefinition
+    messageNameConverter:MessageNameConverter):TypeDefinition
   {
     var messageType = TPath(
     {
@@ -544,10 +577,7 @@ class BinaryFormat
                         }
                         case ProtobufType.TYPE_ENUM:
                         {
-                          var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullName, field.typeName);
-                          var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
-                          var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
-                          macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, $enumPackageExpr.$enumClassName.getNumber(fieldValue));
+                          macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeUint32(buffer, fieldValue.number);
                         }
                         case ProtobufType.TYPE_MESSAGE:
                         {
@@ -567,7 +597,8 @@ class BinaryFormat
                         }
                         default:
                         {
-                          var writeFunctionName = switch (Type.enumConstructor(field.type).split("_"))
+                          var typeName:String = getTypeName(field.type);
+                          var writeFunctionName = switch (typeName.split("_"))
                           {
                             case [ "TYPE", upperCaseTypeName ]:
                             {
@@ -583,7 +614,7 @@ class BinaryFormat
                       }
                       switch (field.label)
                       {
-                        case LABEL_OPTIONAL:
+                        case Label.LABEL_OPTIONAL:
                         {
                           var tagExpr =
                             makeTagExpr(
@@ -598,7 +629,7 @@ class BinaryFormat
                             }
                           }
                         }
-                        case LABEL_REQUIRED:
+                        case Label.LABEL_REQUIRED:
                         {
                           var tagExpr =
                             makeTagExpr(
@@ -610,7 +641,7 @@ class BinaryFormat
                             $writeField;
                           }
                         }
-                        case LABEL_REPEATED:
+                        case Label.LABEL_REPEATED:
                         {
                           if (field.options != null && field.options.packed)
                           {
@@ -642,6 +673,10 @@ class BinaryFormat
                               }
                             }
                           }
+                        }
+                        default:
+                        {
+                          throw 'Unknown label: ${field.label}';
                         }
                       }
                     }
