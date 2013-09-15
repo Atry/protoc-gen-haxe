@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,9 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 package com.dongxiguo.protobuf.compiler;
-using Type;
 import com.dongxiguo.protobuf.Error;
-import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumValueDescriptorProto;
 import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.DescriptorProto;
@@ -51,7 +49,7 @@ import haxe.ds.StringMap;
 #else
 private typedef StringMap<Value> = Hash<Value>;
 #end
-
+private typedef ProtobufType = com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptorProto.Type;
 /**
  * @author 杨博
  */
@@ -196,46 +194,6 @@ private typedef StringMap<Value> = Hash<Value>;
     }
   }
 
-  static function parseDefaultValue(field:FieldDescriptorProto):Dynamic
-  {
-    switch (field.type)
-    {
-      case Type.TYPE_BYTES:
-      {
-        return Parser.parseBytes(field.defaultValue);
-      }
-      case Type.TYPE_STRING:
-      {
-        return field.defaultValue;
-      }
-      case Type.TYPE_INT32, Type.TYPE_UINT32, Type.TYPE_FIXED32, Type.TYPE_SFIXED32, Type.TYPE_SINT32:
-      {
-        return Std.parseInt(field.defaultValue);
-      }
-      case Type.TYPE_BOOL:
-      {
-        switch (field.defaultValue)
-        {
-          case "true": return true;
-          case "false": return false;
-          default: throw 'TYPE_BOOL must not be "true" or "false"';
-        }
-      }
-      case Type.TYPE_DOUBLE, Type.TYPE_FLOAT:
-      {
-        return Std.parseFloat(field.defaultValue);
-      }
-      case Type.TYPE_INT64, Type.TYPE_UINT64, Type.TYPE_FIXED64, Type.TYPE_SFIXED64, Type.TYPE_SINT64:
-      {
-        return Parser.parseInt64(field.defaultValue);
-      }
-      default:
-      {
-        throw '${field.type} must not have default value';
-      }
-    }
-  }
-
   @:noUsing
   public static function makeDefaultValueExpr(
     enclosingMessage:String,
@@ -245,16 +203,16 @@ private typedef StringMap<Value> = Hash<Value>;
   {
     switch (field.type)
     {
-      case Type.TYPE_BYTES:
+      case ProtobufType.TYPE_BYTES:
       {
         var defaultValueStringExpr =
         {
           pos: makeMacroPosition(),
           expr: EConst(CString(field.defaultValue)),
         };
-        return macro com.dongxiguo.protobuf.EscapedBytesParser.parseBytes($defaultValueStringExpr);
+        return macro com.dongxiguo.protobuf.compiler.Parser.parseBytes($defaultValueStringExpr);
       }
-      case Type.TYPE_ENUM:
+      case ProtobufType.TYPE_ENUM:
       {
         var typeName = resolve(enumMap, enclosingMessage, field.typeName);
         var haxeNameParts = nameConverter.getHaxePackage(field.typeName);
@@ -262,16 +220,16 @@ private typedef StringMap<Value> = Hash<Value>;
         haxeNameParts.push(nameConverter.toHaxeEnumConstructorName(field.defaultValue));
         return ExprTools.toFieldExpr(haxeNameParts);
       }
-      case Type.TYPE_INT64, TYPE_UINT64, TYPE_FIXED64, TYPE_SFIXED64, TYPE_SINT64:
+      case ProtobufType.TYPE_INT64, TYPE_UINT64, TYPE_FIXED64, TYPE_SFIXED64, TYPE_SINT64:
       {
         var defaultValueStringExpr =
         {
           pos: makeMacroPosition(),
           expr: EConst(CString(field.defaultValue)),
         };
-        return macro com.dongxiguo.protobuf.Int64Parser.parseInt64($defaultValueStringExpr);
+        return macro com.dongxiguo.protobuf.compiler.Parser.parseInt64($defaultValueStringExpr);
       }
-      case Type.TYPE_INT32, Type.TYPE_UINT32, Type.TYPE_FIXED32, Type.TYPE_SFIXED32, Type.TYPE_SINT32:
+      case ProtobufType.TYPE_INT32, ProtobufType.TYPE_SFIXED32, ProtobufType.TYPE_SINT32:
       {
         return
         {
@@ -279,7 +237,37 @@ private typedef StringMap<Value> = Hash<Value>;
           expr: EConst(CInt(field.defaultValue)),
         };
       }
-      case Type.TYPE_BOOL:
+      case ProtobufType.TYPE_UINT32, ProtobufType.TYPE_FIXED32:
+      {
+        // 不能使用EConst(CInt(field.defaultValue))，因为可能会溢出。
+        var valueExpr =
+        {
+          pos: makeMacroPosition(),
+          expr: EConst(CFloat(field.defaultValue)),
+        };
+        return
+        {
+          pos: makeMacroPosition(),
+          expr: ECheckType(
+            if (Context.defined("cpp"))
+            {
+              // Workaround https://github.com/HaxeFoundation/haxe/issues/2174
+              macro cast com.dongxiguo.protobuf.compiler.Parser.reformatFloatLiteral($valueExpr);
+            }
+            else
+            {
+              macro cast $valueExpr;
+            },
+            TPath(
+              {
+                pack: [ "com", "dongxiguo", "protobuf" ],
+                name: "Types",
+                sub: Type.enumConstructor(field.type),
+                params: [],
+              })),
+        };
+      }
+      case ProtobufType.TYPE_BOOL:
       {
         return
         {
@@ -287,20 +275,48 @@ private typedef StringMap<Value> = Hash<Value>;
           expr: EConst(CIdent(field.defaultValue)),
         }
       }
-      case Type.TYPE_DOUBLE, Type.TYPE_FLOAT:
+      case ProtobufType.TYPE_DOUBLE, ProtobufType.TYPE_FLOAT:
       {
-        return
+        return switch (field.defaultValue)
         {
-          pos: makeMacroPosition(),
-          expr: EConst(CFloat(field.defaultValue)),
+          case "nan":
+          {
+            macro Math.NaN;
+          }
+          case "inf":
+          {
+            macro Math.POSITIVE_INFINITY;
+          }
+          case "-inf":
+          {
+            macro Math.NEGATIVE_INFINITY;
+          }
+          default:
+          {
+            pos: makeMacroPosition(),
+            expr: EConst(CFloat(field.defaultValue)),
+          }
         }
       }
-      case Type.TYPE_STRING:
+      case ProtobufType.TYPE_STRING:
       {
-        return
+        if (Context.defined("js"))
         {
-          pos: makeMacroPosition(),
-          expr: EConst(CString(field.defaultValue)),
+          // Workaround for https://github.com/HaxeFoundation/haxe/issues/1581
+          var quotedStringExpr =
+          {
+            pos: makeMacroPosition(),
+            expr: EConst(CString(haxe.Json.stringify(field.defaultValue))),
+          }
+          return macro untyped __js__($quotedStringExpr);
+        }
+        else
+        {
+          return
+          {
+            pos: makeMacroPosition(),
+            expr: EConst(CString(field.defaultValue)),
+          }
         }
       }
       default:
@@ -568,18 +584,17 @@ private typedef StringMap<Value> = Hash<Value>;
     };
   }
 
-  static function makeMacroPosition(?posInfos:PosInfos):Position
+  macro static function makeMacroPosition():ExprOf<Position>
   {
-    #if macro
-    return Context.currentPos();
-    #else
-    return
+    var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
+    if (haxe.macro.Context.defined("macro"))
     {
-      min: 0,
-      max: 0,
-      file: posInfos.fileName,
-    };
-    #end
+      return macro haxe.macro.Context.makePosition($positionExpr);
+    }
+    else
+    {
+      return positionExpr;
+    }
   }
 
   function getEnumDefinition(
@@ -654,7 +669,7 @@ private typedef StringMap<Value> = Hash<Value>;
     {
       switch (protoType)
       {
-        case Type.TYPE_ENUM:
+        case ProtobufType.TYPE_ENUM:
         {
           var fullyQualifiedName = resolve(enums, fullName, protoTypeName);
           return TPath(
@@ -664,7 +679,7 @@ private typedef StringMap<Value> = Hash<Value>;
             pack: enumNameConverter.getHaxePackage(fullyQualifiedName),
           });
         }
-        case Type.TYPE_MESSAGE:
+        case ProtobufType.TYPE_MESSAGE:
         {
           var fullyQualifiedName = resolve(messages, fullName, protoTypeName);
           return TPath(
@@ -679,7 +694,7 @@ private typedef StringMap<Value> = Hash<Value>;
           return TPath(
           {
             params: [],
-            sub: protoType.enumConstructor(),
+            sub: Type.enumConstructor(protoType),
             name: "Types",
             pack: [ "com", "dongxiguo", "protobuf" ],
           });

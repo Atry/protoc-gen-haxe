@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,7 +30,11 @@
 package com.dongxiguo.protobuf;
 
 typedef TYPE_DOUBLE = StdTypes.Float;
+#if cs
+typedef TYPE_FLOAT = StdTypes.Single;
+#else
 typedef TYPE_FLOAT = StdTypes.Float;
+#end
 typedef TYPE_INT64 = haxe.Int64;
 typedef TYPE_UINT64 = haxe.Int64;
 typedef TYPE_INT32 = StdTypes.Int;
@@ -41,7 +45,7 @@ typedef TYPE_STRING = String.String;
 //TYPE_ENUM;
 //TYPE_MESSAGE;
 typedef TYPE_BYTES = haxe.io.Bytes;
-#if (flash9 || flash9doc)
+#if (flash9 || flash9doc || cs)
   typedef TYPE_UINT32 = StdTypes.UInt;
   typedef TYPE_FIXED32 = StdTypes.UInt;
 #else

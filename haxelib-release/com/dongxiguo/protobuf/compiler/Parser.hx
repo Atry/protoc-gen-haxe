@@ -1,11 +1,11 @@
 // Copyright (c) 2013, 杨博 (Yang Bo)
 // All rights reserved.
-// 
+//
 // Author: 杨博 (Yang Bo) <pop.atry@gmail.com>
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 // * Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimer.
 // * Redistributions in binary form must reproduce the above copyright notice,
@@ -14,7 +14,7 @@
 // * Neither the name of the <ORGANIZATION> nor the names of its contributors
 //   may be used to endorse or promote products derived from this software
 //   without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 // AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 // IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -37,6 +37,11 @@ import haxe.io.BytesOutput;
  */
 @:final class Parser
 {
+
+  macro public static function reformatFloatLiteral(value:Float):haxe.macro.Expr.ExprOf<Float>
+  {
+    return haxe.macro.Context.makeExpr(value, haxe.macro.Context.currentPos());
+  }
 
   static function parseUInt64(decimalString:String):Int64
   {
@@ -113,8 +118,7 @@ import haxe.io.BytesOutput;
   {
     var buffer = new BytesOutput();
     var i = 0;
-    var b = StringTools.fastCodeAt(escapedString, i++);
-    while (!StringTools.isEof(b))
+    while (i < escapedString.length)
     {
       var b = StringTools.fastCodeAt(escapedString, i++);
       switch (b)
@@ -124,46 +128,46 @@ import haxe.io.BytesOutput;
           var b0 = StringTools.fastCodeAt(escapedString, i++);
           switch (b0)
           {
-						case "a".code /* \a */:
+            case "a".code /* \a */:
             {
               buffer.writeByte(7); continue;
             }
-						case "b".code /* \b */:
+            case "b".code /* \b */:
             {
               buffer.writeByte(8); continue;
             }
-						case "f".code /* \f */: buffer.writeByte(12); continue;
-						case "n".code /* \n */: buffer.writeByte(10); continue;
-						case "r".code /* \r */: buffer.writeByte(13); continue;
-						case "t".code /* \t */: buffer.writeByte(9); continue;
-						case "v".code /* \v */: buffer.writeByte(11); continue;
+            case "f".code /* \f */: buffer.writeByte(12); continue;
+            case "n".code /* \n */: buffer.writeByte(10); continue;
+            case "r".code /* \r */: buffer.writeByte(13); continue;
+            case "t".code /* \t */: buffer.writeByte(9); continue;
+            case "v".code /* \v */: buffer.writeByte(11); continue;
             case "x".code /* \xXX */:
             {
-							var x0 = StringTools.fastCodeAt(escapedString, i++);
-							var x1 = StringTools.fastCodeAt(escapedString, i++);
-								buffer.writeByte(
-										parseHexDigit(x0) * 0x10 +
-										parseHexDigit(x1));
-							continue;
+              var x0 = StringTools.fastCodeAt(escapedString, i++);
+              var x1 = StringTools.fastCodeAt(escapedString, i++);
+                buffer.writeByte(
+                    parseHexDigit(x0) * 0x10 +
+                    parseHexDigit(x1));
+              continue;
             }
-						default:
+            default:
             {
-							if (b0 >= "0".code && b0 <= "9".code) {
-								var b1 = StringTools.fastCodeAt(escapedString, i++);
-								var b2 = StringTools.fastCodeAt(escapedString, i++);
-								buffer.writeByte(
-										parseOctalDigit(b0) * 64 +
-										parseOctalDigit(b1) * 8 +
-										parseOctalDigit(b2));
-							} else {
-								buffer.writeByte(b0);
-							}
-							continue;
+              if (b0 >= "0".code && b0 <= "9".code) {
+                var b1 = StringTools.fastCodeAt(escapedString, i++);
+                var b2 = StringTools.fastCodeAt(escapedString, i++);
+                buffer.writeByte(
+                    parseOctalDigit(b0) * 64 +
+                    parseOctalDigit(b1) * 8 +
+                    parseOctalDigit(b2));
+              } else {
+                buffer.writeByte(b0);
+              }
+              continue;
             }
           }
         }
         default:
-				{
+        {
           buffer.writeByte(b);
         }
       }

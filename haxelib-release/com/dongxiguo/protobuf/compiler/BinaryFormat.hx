@@ -89,18 +89,17 @@ class BinaryFormat
       params: [],
     });
 
-  static function makeMacroPosition(?posInfos:PosInfos):Position
+  macro static function makeMacroPosition():ExprOf<Position>
   {
-    #if macro
-    return Context.currentPos();
-    #else
-    return
+    var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
+    if (haxe.macro.Context.defined("macro"))
     {
-      min: 0,
-      max: 0,
-      file: posInfos.fileName,
-    };
-    #end
+      return macro haxe.macro.Context.makePosition($positionExpr);
+    }
+    else
+    {
+      return positionExpr;
+    }
   }
 
   static function makeTagExpr(tag:Int):Expr

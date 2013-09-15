@@ -62,18 +62,17 @@ class Extension
     }
   }
 
-  static function makeMacroPosition(?posInfos:PosInfos):Position
+  macro static function makeMacroPosition():ExprOf<Position>
   {
-    #if macro
-    return Context.currentPos();
-    #else
-    return
+    var positionExpr = Context.makeExpr(Context.getPosInfos(Context.currentPos()), Context.currentPos());
+    if (haxe.macro.Context.defined("macro"))
     {
-      min: 0,
-      max: 0,
-      file: posInfos.fileName,
-    };
-    #end
+      return macro haxe.macro.Context.makePosition($positionExpr);
+    }
+    else
+    {
+      return positionExpr;
+    }
   }
 
   static function getSetterDefinition(
@@ -108,7 +107,7 @@ class Extension
           return macro
           {
             var output = new haxe.io.BytesOutput();
-            $nestedWriterExpr.writeTo(value, output);
+            $nestedWriterExpr.writeTo($valueExpr, output);
             output.getBytes();
           }
         }
@@ -118,7 +117,7 @@ class Extension
           var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
           var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
           var nestedEnumClassExpr = packageDotClass(enumPackageExpr, enumClassName);
-          return macro com.dongxiguo.protobuf.unknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber(value));
+          return macro com.dongxiguo.protobuf.unknownField.VarintUnknownField.fromInt32($nestedEnumClassExpr.getNumber($valueExpr));
         }
         default:
         {
@@ -241,29 +240,47 @@ class Extension
               {
                 if (field.options != null && field.options.packed)
                 {
-                  var writeFunctionName = switch (Type.enumConstructor(field.type).split("_"))
-                  {
-                    case [ "TYPE", upperCaseTypeName ]:
-                    {
-                      "write" + upperCaseTypeName.charAt(0) + upperCaseTypeName.substring(1).toLowerCase();
-                    }
-                    default:
-                    {
-                      throw ProtobufError.MalformedEnumConstructor;
-                    }
-                  }
                   var packedTagExpr =
                   {
                     pos: makeMacroPosition(),
                     expr: EConst(CInt(Std.string(
                       WireType.LENGTH_DELIMITED | (field.number << 3)))),
                   }
+                  var elementExpr = switch (field.type)
+                  {
+                    case TYPE_ENUM:
+                    {
+                      var resolvedFieldTypeName = ProtoData.resolve(self.enums, fullName, field.typeName);
+                      var enumPackageExpr = ExprTools.toFieldExpr(enumClassNameConverter.getHaxePackage(resolvedFieldTypeName));
+                      var enumClassName = enumClassNameConverter.getHaxeClassName(resolvedFieldTypeName);
+                      var enumClassExpr = packageDotClass(enumPackageExpr, enumClassName);
+                      macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.writeInt32(buffer, $enumClassExpr.getNumber(element));
+                    }
+                    default:
+                    {
+
+                      var writeFunctionName = switch (Type.enumConstructor(field.type).split("_"))
+                      {
+                        case [ "TYPE", upperCaseTypeName ]:
+                        {
+                          "write" + upperCaseTypeName.charAt(0) + upperCaseTypeName.substring(1).toLowerCase();
+                        }
+                        default:
+                        {
+                          throw ProtobufError.MalformedEnumConstructor;
+                        }
+                      }
+                      macro com.dongxiguo.protobuf.binaryFormat.WriteUtils.$writeFunctionName(buffer, element);
+                    }
+                  }
                   macro
                   {
                     var buffer = new com.dongxiguo.protobuf.binaryFormat.WritingBuffer();
+                    inline function dummy<T>(i:Iterable<T>) { }
+                    dummy(value);
                     for (element in value)
                     {
-                      com.dongxiguo.protobuf.binaryFormat.WriteUtils.$writeFunctionName(buffervalue);
+                      $elementExpr;
                     }
                     var bytes = buffer.getBytes();
                     if (bytes.length > 0)
@@ -495,19 +512,14 @@ class Extension
                   expr: ENew(fieldBuilderTypePath, []),
                   pos: makeMacroPosition(),
                 };
-                macro if (unknownField.wireType == com.dongxiguo.protobuf.WireType.LENGTH_DELIMITED)
+                macro
                 {
-                  var bytesValue:haxe.io.Bytes = unknownField.value;
-                  var underlyingInput = new haxe.io.BytesInput(bytesValue);
-                  var input = new com.dongxiguo.protobuf.binaryFormat.LimitableBytesInput(underlyingInput, bytesValue.length);
+                  var bytesValue:haxe.io.Bytes = unknownField.toLengthDelimited();
+                  var input = new com.dongxiguo.protobuf.binaryFormat.LimitableBytesInput(bytesValue, bytesValue.length);
                   var fieldBuilder = $newFieldBuilderExpr;
                   $nestedMergerClassExpr.mergeFrom(fieldBuilder, input);
                   fieldBuilder;
                 }
-                else
-                {
-                  throw com.dongxiguo.protobuf.Error.InvalidWireType;
-                };
               }
               case ProtobufType.TYPE_ENUM:
               {
