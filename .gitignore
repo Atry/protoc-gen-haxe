@@ -3,9 +3,6 @@
 /haxelib-release/run.n
 /release.zip
 /haxelib-release/haxedoc.xml
-/tests/dump/
-/tests/build/
-/tests/report/
 /google
 /test.js
 /test.n
