@@ -250,15 +250,20 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
         {
           pos: makeMacroPosition(),
           expr: ECheckType(
-            if (Context.defined("cpp"))
-            {
-              // Workaround https://github.com/HaxeFoundation/haxe/issues/2174
-              macro cast com.dongxiguo.protobuf.compiler.Parser.reformatFloatLiteral($valueExpr);
-            }
-            else
-            {
-              macro cast $valueExpr;
-            },
+            #if macro
+              if (Context.defined("cpp"))
+              {
+                // Workaround https://github.com/HaxeFoundation/haxe/issues/2174
+                macro cast com.dongxiguo.protobuf.compiler.Parser.reformatFloatLiteral($valueExpr);
+              }
+              else
+              {
+                macro cast $valueExpr;
+              }
+            #else
+              macro cast $valueExpr
+            #end
+            ,
             TPath(
               {
                 pack: [ "com", "dongxiguo", "protobuf" ],
@@ -301,24 +306,32 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
       }
       case ProtobufType.TYPE_STRING:
       {
-        if (Context.defined("js"))
-        {
-          // Workaround for https://github.com/HaxeFoundation/haxe/issues/1581
-          var quotedStringExpr =
+        #if macro
+          if (Context.defined("js"))
           {
-            pos: makeMacroPosition(),
-            expr: EConst(CString(haxe.Json.stringify(field.defaultValue))),
+            // Workaround for https://github.com/HaxeFoundation/haxe/issues/1581
+            var quotedStringExpr =
+            {
+              pos: makeMacroPosition(),
+              expr: EConst(CString(haxe.Json.stringify(field.defaultValue))),
+            }
+            return macro untyped __js__($quotedStringExpr);
           }
-          return macro untyped __js__($quotedStringExpr);
-        }
-        else
-        {
+          else
+          {
+            return
+            {
+              pos: makeMacroPosition(),
+              expr: EConst(CString(field.defaultValue)),
+            }
+          }
+        #else
           return
           {
             pos: makeMacroPosition(),
             expr: EConst(CString(field.defaultValue)),
           }
-        }
+        #end
       }
       default:
       {
@@ -393,7 +406,7 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
       },
       {
         name: "get_number",
-        access: [],
+        access: [ AInline ],
         meta: [],
         pos: makeMacroPosition(),
         kind: FFun(
@@ -722,7 +735,7 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
         {
           name: "new",
           pos: makeMacroPosition(),
-          access: [ APublic ],
+          access: [ APublic, AInline ],
           kind: FFun(
           {
             ret: null,
@@ -782,3 +795,4 @@ typedef ReadonlyStringMap<Element> =
   function get(key:String):Null<Element>;
   function keys():Iterator<String>;
 }
+// vim: et sts=2 sw=2

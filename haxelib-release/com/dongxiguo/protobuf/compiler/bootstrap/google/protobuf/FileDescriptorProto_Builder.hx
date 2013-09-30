@@ -12,7 +12,7 @@ class FileDescriptorProto_Builder {
 	public var extension(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldDescriptorProto_Builder>;
 	@:optional public var options(default,default):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FileOptions_Builder>;
 	@:optional public var sourceCodeInfo(default,default):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.SourceCodeInfo_Builder>;
-	public function new() {
+	public inline function new() {
 		this.dependency=[];
 		this.publicDependency=[];
 		this.weakDependency=[];

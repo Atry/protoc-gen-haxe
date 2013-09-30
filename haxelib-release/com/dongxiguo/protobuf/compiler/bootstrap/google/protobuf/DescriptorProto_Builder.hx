@@ -8,7 +8,7 @@ class DescriptorProto_Builder {
 	public var enumType(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.EnumDescriptorProto_Builder>;
 	public var extensionRange(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.descriptorProto.ExtensionRange_Builder>;
 	@:optional public var options(default,default):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.MessageOptions_Builder>;
-	public function new() {
+	public inline function new() {
 		this.field=[];
 		this.extension=[];
 		this.nestedType=[];

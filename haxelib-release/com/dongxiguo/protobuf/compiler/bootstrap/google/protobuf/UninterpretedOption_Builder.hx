@@ -8,7 +8,7 @@ class UninterpretedOption_Builder {
 	@:optional public var doubleValue(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_DOUBLE>;
 	@:optional public var stringValue(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BYTES>;
 	@:optional public var aggregateValue(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
-	public function new() {
+	public inline function new() {
 		this.name=[];
 	}
 }

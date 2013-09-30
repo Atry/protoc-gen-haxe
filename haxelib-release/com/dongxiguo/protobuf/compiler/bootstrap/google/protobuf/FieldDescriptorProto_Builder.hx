@@ -9,6 +9,6 @@ class FieldDescriptorProto_Builder {
 	@:optional public var extendee(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var defaultValue(default,default):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_STRING>;
 	@:optional public var options(default,default):StdTypes.Null<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.FieldOptions_Builder>;
-	public function new() {
+	public inline function new() {
 	}
 }

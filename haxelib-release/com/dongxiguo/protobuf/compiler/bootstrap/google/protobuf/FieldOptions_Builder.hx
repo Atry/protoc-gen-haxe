@@ -44,7 +44,7 @@ class FieldOptions_Builder {
 	}
 	@:isVar public var weak(get_weak,set_weak):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
-	public function new() {
+	public inline function new() {
 		this.uninterpretedOption=[];
 	}
 }

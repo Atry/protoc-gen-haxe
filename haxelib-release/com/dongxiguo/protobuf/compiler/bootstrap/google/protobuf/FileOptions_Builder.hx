@@ -65,7 +65,7 @@ class FileOptions_Builder {
 	}
 	@:isVar public var pyGenericServices(get_pyGenericServices,set_pyGenericServices):StdTypes.Null<com.dongxiguo.protobuf.Types.TYPE_BOOL>;
 	public var uninterpretedOption(default,default):Array<com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.UninterpretedOption_Builder>;
-	public function new() {
+	public inline function new() {
 		this.uninterpretedOption=[];
 	}
 }

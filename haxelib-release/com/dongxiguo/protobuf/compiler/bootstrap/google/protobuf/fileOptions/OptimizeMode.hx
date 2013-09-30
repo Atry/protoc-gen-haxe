@@ -4,7 +4,7 @@ abstract OptimizeMode(StdTypes.Int) {
 		this=number;
 	}
 	public var number(get,never):StdTypes.Int;
-	function get_number():StdTypes.Int {
+	inline function get_number():StdTypes.Int {
 		return this;
 	}
 	static public var SPEED(default,never)=new com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fileOptions.OptimizeMode(1);
