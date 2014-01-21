@@ -48,7 +48,7 @@ message SampleMessage {
 
 import sys.io.File;
 import sys.FileSystem;
-import com.dongxiguo.protobuf.binaryFormat.BinaryFileInput;
+import com.dongxiguo.protobuf.binaryFormat.LimitableFileInput;
 import samplePackage.SampleMessage_Builder;
 using samplePackage.SampleMessage_Merger;
 using samplePackage.SampleMessage_Writer;
