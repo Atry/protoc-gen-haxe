@@ -727,6 +727,7 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
             constructorBlock.push(macro this.$haxeFieldName = []);
           }
         }
+        default:
       }
     }
     if (!readonly)
