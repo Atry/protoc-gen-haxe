@@ -34,7 +34,7 @@ import com.dongxiguo.protobuf.compiler.bootstrap.google.protobuf.fieldDescriptor
 import com.dongxiguo.protobuf.WireType;
 import haxe.macro.Context;
 import haxe.macro.Expr;
-import haxe.macro.ExprTools;
+import haxe.macro.MacroStringTools;
 import haxe.PosInfos;
 using Lambda;
 
@@ -100,7 +100,7 @@ class Extension
           var nestedWriterPackage =
             writerNameConverter.getHaxePackage(resolvedFieldTypeName);
           var nestedWriterPackageExpr =
-            ExprTools.toFieldExpr(nestedWriterPackage);
+            MacroStringTools.toFieldExpr(nestedWriterPackage);
           var nestedWriterName =
             writerNameConverter.getHaxeClassName(resolvedFieldTypeName);
           var nestedWriterExpr = packageDotClass(nestedWriterPackageExpr, nestedWriterName);
@@ -526,7 +526,7 @@ class Extension
                 var nestedMergerPackage =
                   mergerNameConverter.getHaxePackage(resolvedFieldTypeName);
                 var nestedMergerPackageExpr =
-                  ExprTools.toFieldExpr(nestedMergerPackage);
+                  MacroStringTools.toFieldExpr(nestedMergerPackage);
                 var nestedMergerName =
                   mergerNameConverter.getHaxeClassName(resolvedFieldTypeName);
                 var nestedMergerClassExpr = packageDotClass(nestedMergerPackageExpr, nestedMergerName);
