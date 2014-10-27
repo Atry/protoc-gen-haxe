@@ -89,7 +89,7 @@ import haxe.Int64;
     {
       for (i in 0...4) {
         buffer.writeByte((low & 0x7F) | 0x80);
-        low >>> = 7;
+        low >>>= 7;
       }
       if ((high & (0xFFFFFFF << 3)) == 0)
       {
