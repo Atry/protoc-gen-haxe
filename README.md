@@ -1,5 +1,7 @@
 Warning: This project is obsolete. Looking for serialization solution in Haxe? Try [json-stream](https://github.com/qifun/json-stream)!
 
+---
+
 protoc-gen-haxe
 ===============
 
