@@ -1,4 +1,4 @@
-Warning: This project is obsolete. Looking for serialization solution in Haxe? Try [json-stream](https://github.com/qifun/json-stream)!
+Warning: This project is obsolete, and only tested on Haxe 3.0.x branches. Looking for serialization solution in Haxe? Try [json-stream](https://github.com/qifun/json-stream)!
 
 ---
 
