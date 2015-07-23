@@ -41,7 +41,7 @@ import haxe.io.BytesOutput;
 import haxe.macro.Expr;
 import haxe.Int64;
 import haxe.macro.Context;
-import haxe.macro.ExprTools;
+import haxe.macro.MacroStringTools;
 import haxe.PosInfos;
 using StringTools;
 #if haxe3
@@ -219,7 +219,7 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
         var haxeNameParts = nameConverter.getHaxePackage(field.typeName);
         haxeNameParts.push(nameConverter.getHaxeEnumName(field.typeName));
         haxeNameParts.push(nameConverter.toHaxeEnumConstructorName(field.defaultValue));
-        return ExprTools.toFieldExpr(haxeNameParts);
+        return MacroStringTools.toFieldExpr(haxeNameParts);
       }
       case ProtobufType.TYPE_INT64, ProtobufType.TYPE_UINT64, ProtobufType.TYPE_FIXED64, ProtobufType.TYPE_SFIXED64, ProtobufType.TYPE_SINT64:
       {
@@ -727,6 +727,7 @@ private typedef ProtobufError = com.dongxiguo.protobuf.Error;
             constructorBlock.push(macro this.$haxeFieldName = []);
           }
         }
+        default:
       }
     }
     if (!readonly)

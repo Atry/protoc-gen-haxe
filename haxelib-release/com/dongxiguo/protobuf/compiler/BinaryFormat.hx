@@ -42,7 +42,7 @@ import haxe.macro.Expr;
 #if neko
 import haxe.macro.Context;
 #end
-import haxe.macro.ExprTools;
+import haxe.macro.MacroStringTools;
 import haxe.PosInfos;
 
 #if haxe3
@@ -194,7 +194,7 @@ class BinaryFormat
           var nestedMergerPackage =
             mergerNameConverter.getHaxePackage(resolvedFieldTypeName);
           var nestedMergerPackageExpr =
-            ExprTools.toFieldExpr(nestedMergerPackage);
+            MacroStringTools.toFieldExpr(nestedMergerPackage);
           var nestedMergerName =
             mergerNameConverter.getHaxeClassName(resolvedFieldTypeName);
           var newFieldBuilderExpr =
@@ -585,7 +585,7 @@ class BinaryFormat
                           var nestedWriterPackage =
                             writerNameConverter.getHaxePackage(resolvedFieldTypeName);
                           var nestedWriterPackageExpr =
-                            ExprTools.toFieldExpr(nestedWriterPackage);
+                            MacroStringTools.toFieldExpr(nestedWriterPackage);
                           var nestedWriterName =
                             writerNameConverter.getHaxeClassName(resolvedFieldTypeName);
                           macro
